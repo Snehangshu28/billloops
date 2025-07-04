@@ -30,6 +30,17 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 
+const COLORS = {
+  background: '#F8F9F6',
+  card: '#fff',
+  primary: '#437057',
+  primaryDark: '#2F5249',
+  accent: '#E3DE61',
+  text: '#2F5249',
+  shadow: '0 4px 16px rgba(67,112,87,0.08)',
+};
+const FONT = { fontFamily: 'Poppins, sans-serif' };
+
 const initialEmployee = {
   name: '',
   contact: '',
@@ -139,7 +150,7 @@ const Employee = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1100, mx: 'auto', my: 3, bgcolor: '#f7f9fc', p: { xs: 1, md: 3 }, borderRadius: 4 }}>
+    <Box sx={{ maxWidth: 1100, mx: 'auto', my: 3, bgcolor: COLORS.background, p: { xs: 1, md: 3 }, borderRadius: 4, ...FONT }}>
       {/* Tab Buttons */}
       <Stack direction="row" spacing={2} mb={3} justifyContent="center">
         <Button
@@ -170,7 +181,7 @@ const Employee = () => {
 
       {/* 1. Add Employee Details */}
       {activeTab === 'add' && (
-        <Paper sx={{ p: { xs: 2, md: 5 }, mb: 4, boxShadow: 3, borderRadius: 4 }} elevation={3}>
+        <Paper sx={{ p: { xs: 2, md: 5 }, mb: 4, boxShadow: 3, borderRadius: 4, bgcolor: COLORS.card }} elevation={3}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="h5" fontWeight={700}>Add Employee Details</Typography>
             <Button variant="contained" startIcon={<AddIcon />} size="large" sx={{ borderRadius: 2, fontWeight: 600 }} onClick={() => handleOpen()}>
@@ -271,7 +282,7 @@ const Employee = () => {
 
       {/* 2. Manage Employee */}
       {activeTab === 'manage' && (
-        <Paper sx={{ p: { xs: 2, md: 5 }, mb: 4, boxShadow: 3, borderRadius: 4 }} elevation={2}>
+        <Paper sx={{ p: { xs: 2, md: 5 }, mb: 4, boxShadow: 3, borderRadius: 4, bgcolor: COLORS.card }} elevation={2}>
           <Typography variant="h5" fontWeight={700} mb={2}>Manage Employee</Typography>
           <TableContainer sx={{ borderRadius: 3, boxShadow: 2 }}>
             <Table size="medium">
@@ -332,7 +343,7 @@ const Employee = () => {
 
       {/* 3. Employee Analysis */}
       {activeTab === 'analysis' && (
-        <Paper sx={{ p: { xs: 2, md: 5 }, boxShadow: 3, borderRadius: 4 }} elevation={2}>
+        <Paper sx={{ p: { xs: 2, md: 5 }, boxShadow: 3, borderRadius: 4, bgcolor: COLORS.card }} elevation={2}>
           <Typography variant="h5" fontWeight={700} mb={2}>Employee Analysis</Typography>
           {/* Date Range Selector */}
           <Stack direction="row" spacing={2} alignItems="center" mb={3}>

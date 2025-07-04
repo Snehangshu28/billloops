@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -8,27 +8,24 @@ import {
   Checkbox,
   Container,
   Grid,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import {
-  Business,
-  Store,
-  Restaurant,
-  LocalHospital,
-  School,
-  Build,
-  Spa,
-} from '@mui/icons-material';
+import { Spa } from '@mui/icons-material';
 import { useBusiness } from '../../context/BusinessContext';
-import { useNavigate } from 'react-router-dom';
+import Signup from '../auth/Signup';
+
+const PALETTE = {
+  forest: '#2F5249',
+  moss: '#437057',
+  olive: '#97B067',
+  mustard: '#E3DE61',
+};
+
+const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 const categories = [
-  { label: 'Beauty & Wellness', icon: <Spa fontSize="large" /> },
+  { label: 'Beauty & Wellness', icon: <Spa sx={{ fontSize: 28 }} /> },
 ];
 
 const subcategories = {
@@ -42,39 +39,16 @@ const subcategories = {
     'Skincare Clinics',
     'Hair Product Stores',
   ],
-  Retail: ['Grocery', 'Clothing', 'Electronics', 'Pharmacy'],
-  Restaurant: ['Cafe', 'Fine Dining', 'Fast Food', 'Bakery'],
-  Healthcare: ['Clinic', 'Dental', 'Pharmacy', 'Lab'],
-  Education: ['School', 'Coaching', 'College', 'Library'],
-  Manufacturing: ['Factory', 'Workshop', 'Assembly', 'Packaging'],
-  Other: ['Consulting', 'IT', 'Freelance', 'Other'],
-};
-
-const steps = ['Select Category', 'Select Subcategories', 'Business Info'];
-
-const initialForm = {
-  name: '',
-  address: '',
-  phone: '',
-  email: '',
 };
 
 const Onboarding = () => {
-  const { data, updateOnboarding } = useBusiness();
+  const { data } = useBusiness();
   const [activeStep, setActiveStep] = useState(0);
   const [category, setCategory] = useState(data.onboarding.category || '');
   const [selectedSubs, setSelectedSubs] = useState(
     data.onboarding.subcategories || []
   );
-  const [form, setForm] = useState(data.onboarding.businessInfo || initialForm);
   const isMobile = useMediaQuery('(max-width:600px)');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    setCategory(data.onboarding.category || '');
-    setSelectedSubs(data.onboarding.subcategories || []);
-    setForm(data.onboarding.businessInfo || initialForm);
-  }, [data.onboarding]);
 
   // Step 1: Category selection
   const handleCategorySelect = (cat) => setCategory(cat);
@@ -86,138 +60,92 @@ const Onboarding = () => {
     );
   };
 
-  // Step 3: Form input
-  const handleFormChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
   const handleNext = () => setActiveStep((s) => s + 1);
   const handleBack = () => setActiveStep((s) => s - 1);
-
-  const handleFinish = () => {
-    updateOnboarding({
-      category,
-      subcategories: selectedSubs,
-      businessInfo: form,
-    });
-    navigate('/signup', {
-      state: {
-        category,
-        subcategories: selectedSubs,
-        businessInfo: form,
-      },
-    });
-  };
 
   // Step content
   const renderStep = () => {
     switch (activeStep) {
       case 0:
         return (
-          <Grid container spacing={2} justifyContent="center">
-            {categories.map((cat) => (
-              <Grid item xs={6} sm={4} md={2} key={cat.label}>
-                <Card
-                  variant={category === cat.label ? 'elevation' : 'outlined'}
-                  sx={{
-                    border:
-                      category === cat.label
-                        ? '2px solid #1976d2'
-                        : '1px solid #ccc',
-                    boxShadow: category === cat.label ? 4 : 0,
-                    transition: '0.2s',
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => handleCategorySelect(cat.label)}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 6 }}>
+            <Typography sx={{ fontSize: 24, fontWeight: 600, color: PALETTE.forest, mb: 3, ...FONT }}>
+              Choose the Business Category
+            </Typography>
+            <Grid container spacing={0} justifyContent="center">
+              {categories.map((cat) => (
+                <Grid item xs={12} sm={6} md={4} key={cat.label} sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Card
+                    sx={{
+                      background: PALETTE.olive,
+                      border: `2px solid ${PALETTE.moss}`,
+                      borderRadius: 2,
+                      minWidth: 220,
+                      minHeight: 120,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: 'none',
+                      transition: 'all 0.3s ease-in-out',
+                      cursor: 'pointer',
+                      '&:hover': { transform: 'scale(1.04)', boxShadow: '0 4px 24px rgba(67,112,87,0.10)' },
+                    }}
                   >
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      {cat.icon}
-                      <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                        {cat.label}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                    <CardActionArea onClick={() => handleCategorySelect(cat.label)} sx={{ p: 2, borderRadius: 2 }}>
+                      <CardContent sx={{ textAlign: 'center' }}>
+                        {cat.icon}
+                        <Typography sx={{ fontSize: 18, fontWeight: 500, color: PALETTE.forest, mt: 1, ...FONT }}>
+                          {cat.label}
+                        </Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
         );
       case 1:
         return (
-          <Grid container spacing={2} justifyContent="center">
-            {(subcategories[category] || []).map((sub) => (
-              <Grid item xs={12} sm={6} md={3} key={sub}>
-                <Card
-                  variant={
-                    selectedSubs.includes(sub) ? 'elevation' : 'outlined'
-                  }
-                  sx={{
-                    border: selectedSubs.includes(sub)
-                      ? '2px solid #1976d2'
-                      : '1px solid #ccc',
-                    boxShadow: selectedSubs.includes(sub) ? 4 : 0,
-                    transition: '0.2s',
-                  }}
-                >
-                  <CardActionArea onClick={() => handleSubToggle(sub)}>
-                    <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Checkbox
-                        checked={selectedSubs.includes(sub)}
-                        sx={{ pointerEvents: 'none' }}
-                        color="primary"
-                      />
-                      <Typography variant="subtitle1">{sub}</Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 6 }}>
+            <Typography sx={{ fontSize: 24, fontWeight: 600, color: PALETTE.forest, mb: 3, ...FONT }}>
+              Choose the Business Sub-Category
+            </Typography>
+            <Grid container spacing={0} justifyContent="center" sx={{ gap: '24px', flexWrap: 'wrap' }}>
+              {(subcategories[category] || []).map((sub) => {
+                const selected = selectedSubs.includes(sub);
+                return (
+                  <Grid item key={sub} sx={{ width: 240, height: 100, m: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Card
+                      sx={{
+                        width: 240,
+                        height: 100,
+                        background: selected ? PALETTE.olive : '#fff',
+                        border: selected ? `2px solid ${PALETTE.moss}` : `1px solid ${PALETTE.moss}`,
+                        borderRadius: 2,
+                        boxShadow: 'none',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all 0.3s ease-in-out',
+                        cursor: 'pointer',
+                        '&:hover': { transform: 'scale(1.04)', background: PALETTE.olive },
+                      }}
+                    >
+                      <CardActionArea onClick={() => handleSubToggle(sub)} sx={{ borderRadius: 2, width: '100%', height: '100%' }}>
+                        <CardContent sx={{ textAlign: 'center', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography sx={{ fontSize: 18, fontWeight: 500, color: PALETTE.forest, ...FONT }}>{sub}</Typography>
+                        </CardContent>
+                      </CardActionArea>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
         );
       case 2:
         return (
-          <Box
-            component="form"
-            sx={{ mt: 2, width: isMobile ? '100%' : 400, mx: 'auto' }}
-          >
-            <TextField
-              label="Business Name"
-              name="name"
-              value={form.name}
-              onChange={handleFormChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Address"
-              name="address"
-              value={form.address}
-              onChange={handleFormChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Phone"
-              name="phone"
-              value={form.phone}
-              onChange={handleFormChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Email"
-              name="email"
-              value={form.email}
-              onChange={handleFormChange}
-              fullWidth
-              margin="normal"
-              required
-              type="email"
-            />
+          <Box sx={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{ width: '100%', maxWidth: 400 }}>
+              <Signup hideReview />
+            </Box>
           </Box>
         );
       default:
@@ -225,68 +153,43 @@ const Onboarding = () => {
     }
   };
 
-  // Button enable/disable logic
   const canProceed = () => {
     if (activeStep === 0) return !!category;
     if (activeStep === 1) return selectedSubs.length > 0;
-    if (activeStep === 2)
-      return (
-        (form.name || '').trim() &&
-        (form.address || '').trim() &&
-        (form.phone || '').trim() &&
-        (form.email || '').trim()
-      );
-    return false;
+    return true;
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: isMobile ? 2 : 6 }}>
-      <Box
-        sx={{
-          maxWidth: 700,
-          mx: 'auto',
-          bgcolor: '#fff',
-          p: isMobile ? 2 : 4,
-          borderRadius: 3,
-          boxShadow: 3,
-        }}
-      >
-        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        {renderStep()}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            variant="outlined"
-          >
-            Back
-          </Button>
-          {activeStep < steps.length - 1 ? (
+    <Box sx={{ minHeight: '100vh', background: '#FFFBDE', py: 6, ...FONT }}>
+      <Container maxWidth="md">
+        <Box sx={{ mb: 4 }}>{renderStep()}</Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
+          {activeStep > 0 && (
+            <Button onClick={handleBack} variant="outlined" sx={{
+              color: PALETTE.moss, borderColor: PALETTE.moss, background: '#fff',
+              fontWeight: 500, fontSize: 16, borderRadius: 9999, px: 4, py: 1, transition: 'all 0.3s',
+              '&:hover': { background: PALETTE.olive, color: PALETTE.forest }, ...FONT
+            }}>
+              Back
+            </Button>
+          )}
+          {activeStep < 2 && (
             <Button
               onClick={handleNext}
               variant="contained"
+              sx={{
+                background: PALETTE.moss, color: '#fff', fontWeight: 500, fontSize: 16, borderRadius: 9999, px: 6, py: 1.5,
+                boxShadow: 'none', transition: 'all 0.3s',
+                '&:hover': { background: PALETTE.forest, color: '#fff', transform: 'scale(1.04)' }, ...FONT
+              }}
               disabled={!canProceed()}
             >
               Next
             </Button>
-          ) : (
-            <Button
-              variant="contained"
-              disabled={!canProceed()}
-              onClick={handleFinish}
-            >
-              Finish
-            </Button>
           )}
         </Box>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

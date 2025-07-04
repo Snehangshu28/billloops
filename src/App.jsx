@@ -15,32 +15,40 @@ import Signup from './components/auth/Signup';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#3f51b5', // Indigo
-      light: '#6573c3',
-      dark: '#2c387e',
+      main: '#437057', // Olive green
+      light: '#97B067',
+      dark: '#2F5249',
       contrastText: '#fff',
     },
     secondary: {
-      main: '#e91e63', // Pink
-      light: '#ff6090',
-      dark: '#b0003a',
-      contrastText: '#fff',
+      main: '#E3DE61', // Mustard yellow
+      light: '#F8F9F6',
+      dark: '#CBC3E3',
+      contrastText: '#2F5249',
     },
     background: {
-      default: '#f4f6fb',
+      default: '#F8F9F6',
       paper: '#fff',
     },
+    text: {
+      primary: '#2F5249',
+      secondary: '#6B7280',
+    },
+    success: { main: '#97B067' },
+    warning: { main: '#E3DE61' },
+    info: { main: '#D7C9E7' },
+    error: { main: '#D32F2F' },
   },
   shape: {
     borderRadius: 16,
   },
   shadows: [
     'none',
-    '0px 2px 8px 0px rgba(63,81,181,0.08)',
-    ...Array(23).fill('0px 4px 24px 0px rgba(63,81,181,0.07)'),
+    '0px 2px 8px 0px rgba(67,112,87,0.08)',
+    ...Array(23).fill('0px 4px 24px 0px rgba(67,112,87,0.07)'),
   ],
   typography: {
-    fontFamily: 'Inter, Roboto, Arial, sans-serif',
+    fontFamily: 'Poppins, sans-serif',
     h1: { fontWeight: 700, fontSize: '2.5rem' },
     h2: { fontWeight: 700, fontSize: '2rem' },
     h3: { fontWeight: 600, fontSize: '1.5rem' },
@@ -54,7 +62,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 2px 8px 0 rgba(63,81,181,0.08)',
+          boxShadow: '0 2px 8px 0 rgba(67,112,87,0.08)',
+          fontFamily: 'Poppins, sans-serif',
         },
       },
     },
@@ -62,7 +71,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 16,
-          boxShadow: '0 4px 24px 0 rgba(63,81,181,0.07)',
+          boxShadow: '0 4px 24px 0 rgba(67,112,87,0.07)',
+          fontFamily: 'Poppins, sans-serif',
         },
       },
     },
@@ -85,7 +95,7 @@ const theme = createTheme({
 
 function App() {
   useEffect(() => {
-    document.title = 'BILLUS';
+    document.title = 'Billoops';
   }, []);
 
   return (
@@ -94,7 +104,8 @@ function App() {
       <div
         style={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #e3e9f7 0%, #f4f6fb 100%)',
+          background: '#F8F9F6',
+          fontFamily: 'Poppins, sans-serif',
         }}
       >
         <BusinessProvider>

@@ -26,6 +26,17 @@ import { useBusiness } from '../../context/BusinessContext';
 
 const initialProduct = { name: '', quantity: '' };
 
+const COLORS = {
+  background: '#F8F9F6',
+  card: '#fff',
+  primary: '#437057',
+  primaryDark: '#2F5249',
+  accent: '#E3DE61',
+  text: '#2F5249',
+  shadow: '0 4px 16px rgba(67,112,87,0.08)',
+};
+const FONT = { fontFamily: 'Poppins, sans-serif' };
+
 const Stock = () => {
   const { data, updateStock } = useBusiness();
   const [products, setProducts] = useState(data.stock);
@@ -68,10 +79,10 @@ const Stock = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', my: 3, bgcolor: '#f7f9fc', p: { xs: 1, md: 3 }, borderRadius: 4 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', my: 3, bgcolor: COLORS.background, p: { xs: 1, md: 3 }, borderRadius: 4 }}>
       <Paper sx={{ p: { xs: 2, md: 5 }, boxShadow: 3, borderRadius: 4 }} elevation={3}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" fontWeight={700}>Products</Typography>
+          <Typography variant="h5" fontWeight={700} sx={FONT}>Products</Typography>
           <Button variant="contained" startIcon={<AddIcon />} size="large" sx={{ borderRadius: 2, fontWeight: 600 }} onClick={() => handleOpen()}>
             Add Product
           </Button>

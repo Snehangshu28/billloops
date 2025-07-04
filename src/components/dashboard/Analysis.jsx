@@ -59,7 +59,16 @@ const staff = [
   { name: 'Priya', services: 38, revenue: 11000, avgTime: 32, rating: 4.8 },
   { name: 'Rahul', services: 30, revenue: 9000, avgTime: 40, rating: 4.5 },
 ];
-const COLORS = ['#1976d2', '#00C49F', '#FFBB28', '#FF8042', '#7b1fa2', '#0288d1', '#c2185b', '#ffa000', '#388e3c', '#303f9f'];
+const COLORS = {
+  background: '#F8F9F6',
+  card: '#fff',
+  primary: '#437057',
+  primaryDark: '#2F5249',
+  accent: '#E3DE61',
+  text: '#2F5249',
+  shadow: '0 4px 16px rgba(67,112,87,0.08)',
+};
+const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 function SummaryCards() {
   const theme = useTheme();

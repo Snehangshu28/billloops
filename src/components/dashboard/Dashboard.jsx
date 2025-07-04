@@ -17,6 +17,17 @@ import {
   useMediaQuery,
   Paper,
   Tooltip,
+  Grid,
+  Card,
+  CardContent,
+  Stack,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Button,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -32,6 +43,11 @@ import Analysis from './Analysis';
 import ProfileModal from '../profile/ProfileModal';
 import Customer from './Customer';
 import GroupIcon from '@mui/icons-material/Group';
+import { Spa, Receipt, TrendingUp } from '@mui/icons-material';
+import HistoryIcon from '@mui/icons-material/History';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import Sidebar from '../common/Sidebar';
+import Navbar from '../common/Navbar';
 
 const drawerWidth = 220;
 
@@ -43,21 +59,147 @@ const tabs = [
   { label: 'Customer', icon: <GroupIcon sx={{ fontSize: 30 }} /> },
 ];
 
+const PALETTE = {
+  forest: '#2F5249', // sidebar bg, headings, primary text
+  moss: '#437057', // active menu, primary buttons, form borders
+  olive: '#97B067', // icon circles, hover backgrounds, tag highlights
+  mustard: '#E3DE61', // CTA buttons, badges, invoice status
+  card: '#fff',
+  background: '#FFFBDE',
+  shadow: '0 4px 16px rgba(67,112,87,0.08)',
+};
+
+const FONT = { fontFamily: 'Poppins, sans-serif' };
+
+const widgets = [
+  {
+    icon: <PeopleIcon fontSize="large" />, label: 'Customers', value: '1,245',
+    color: PALETTE.moss,
+  },
+  {
+    icon: <ReceiptLongIcon fontSize="large" />, label: 'Bills', value: '3,210',
+    color: PALETTE.moss,
+  },
+  {
+    icon: <TrendingUp fontSize="large" />, label: 'Revenue', value: '₹2,45,000',
+    color: PALETTE.mustard,
+  },
+  {
+    icon: <Spa fontSize="large" />, label: 'Services', value: '18',
+    color: PALETTE.moss,
+  },
+];
+
 const Dashboard = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [billSubView, setBillSubView] = useState('create');
+  const [billDrawerOpen, setBillDrawerOpen] = useState(false);
+  const [billDrawerView, setBillDrawerView] = useState('create');
+  const [dateFrom, setDateFrom] = useState(null);
+  const [dateTo, setDateTo] = useState(null);
   const isMobile = useMediaQuery('(max-width:900px)');
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  // Dummy previous bills for demo
+  const previousBills = [
+    { id: 'INV-001', client: 'Alice', date: '2024-06-10', amount: 1200 },
+    { id: 'INV-002', client: 'Bob', date: '2024-06-10', amount: 800 },
+    { id: 'INV-003', client: 'Charlie', date: '2024-06-09', amount: 1500 },
+  ];
+
+  // Drawer menu options
+  const billDrawerMenu = [
+    { key: 'create', label: 'Create a Bill', icon: <ReceiptLongIcon /> },
+    { key: 'records', label: 'Show previous records', icon: <HistoryIcon /> },
+  ];
+
+  // Bill Drawer content
+  const renderBillDrawerContent = () => (
+    <Box sx={{ width: 320, p: 3, background: '#328E6E', height: '100%', color: '#fff', ...FONT }} onMouseLeave={() => setBillDrawerOpen(false)}>
+      <Typography sx={{ fontSize: 22, fontWeight: 700, mb: 2, color: '#fff', ...FONT }}>Billing</Typography>
+      <List>
+        {billDrawerMenu.map((item) => (
+          <ListItem key={item.key} disablePadding>
+            <ListItemButton
+              selected={billDrawerView === item.key}
+              onClick={() => setBillDrawerView(item.key)}
+              sx={{
+                borderRadius: 2,
+                mx: 1,
+                my: 0.5,
+                background: billDrawerView === item.key ? PALETTE.moss : 'transparent',
+                color: '#fff',
+                transition: 'all 0.3s',
+                '&:hover': { background: PALETTE.olive },
+                minHeight: 48,
+                ...FONT,
+              }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: 40 }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 500, fontSize: 16, ...FONT }} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      {billDrawerView === 'records' && (
+        <Box sx={{ mt: 3 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" mb={2}>
+            <DatePicker label="From" value={dateFrom} onChange={setDateFrom} sx={{ ...FONT, bgcolor: '#fff', borderRadius: 2 }} />
+            <DatePicker label="To" value={dateTo} onChange={setDateTo} sx={{ ...FONT, bgcolor: '#fff', borderRadius: 2 }} />
+          </Stack>
+          <Paper sx={{ bgcolor: '#fff', color: PALETTE.text, borderRadius: 2, p: 2 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: 16, mb: 1, color: PALETTE.forest }}>Previous Bills</Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Invoice ID</TableCell>
+                    <TableCell>Client</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Amount</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {previousBills.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell>{row.id}</TableCell>
+                      <TableCell>{row.client}</TableCell>
+                      <TableCell>{row.date}</TableCell>
+                      <TableCell>₹{row.amount}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Box>
+      )}
+      {billDrawerView === 'create' && (
+        <Button
+          variant="contained"
+          sx={{ mt: 4, background: PALETTE.mustard, color: PALETTE.forest, fontWeight: 600, borderRadius: 9999, px: 4, py: 1.5, fontSize: 16, transition: 'all 0.3s', '&:hover': { background: PALETTE.olive } }}
+          onClick={() => {
+            setSelectedTab(0);
+            setBillDrawerOpen(false);
+          }}
+        >
+          Go to Billing Page
+        </Button>
+      )}
+    </Box>
+  );
+
+  const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
 
   const drawer = (
     <Box
       sx={{
         height: '100%',
-        background: 'linear-gradient(135deg, #3f51b5 0%, #6573c3 100%)',
+        background: PALETTE.forest,
         color: '#fff',
         p: 0,
+        position: 'relative',
       }}
     >
       <Toolbar sx={{ minHeight: 72 }} />
@@ -71,33 +213,71 @@ const Dashboard = () => {
                 setSelectedTab(idx);
                 if (isMobile) setMobileOpen(false);
               }}
+              onMouseEnter={() => {
+                if (tab.label === 'Bill') setBillDrawerOpen(true);
+              }}
               sx={{
                 borderRadius: 2,
                 mx: 1,
-                background: selectedTab === idx ? 'rgba(255,255,255,0.15)' : 'transparent',
+                background: selectedTab === idx ? PALETTE.moss : 'transparent',
                 '&:hover': {
-                  background: 'rgba(255,255,255,0.10)',
+                  background: PALETTE.olive,
+                  color: '#fff',
                 },
                 transition: 'background 0.2s',
                 minHeight: 56,
+                color: '#fff',
+                ...FONT,
               }}
             >
               <ListItemIcon sx={{ color: '#fff', minWidth: 44 }}>{tab.icon}</ListItemIcon>
               <ListItemText
                 primary={tab.label}
-                primaryTypographyProps={{ fontWeight: selectedTab === idx ? 700 : 500, fontSize: 18 }}
+                primaryTypographyProps={{ fontWeight: selectedTab === idx ? 700 : 500, fontSize: 18, ...FONT }}
               />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
+      {/* Bill Drawer */}
+      <Box sx={{ position: 'absolute', left: drawerWidth, top: 0, height: '100%', zIndex: 1300 }}>
+        <Drawer
+          anchor="left"
+          open={billDrawerOpen}
+          onClose={() => setBillDrawerOpen(false)}
+          transitionDuration={300}
+          PaperProps={{ sx: { width: 320, background: '#328E6E', color: '#fff', borderTopRightRadius: 16, borderBottomRightRadius: 16, boxShadow: 6, transition: 'all 0.3s', ...FONT } }}
+          variant={isMobile ? 'temporary' : 'persistent'}
+          hideBackdrop
+        >
+          {renderBillDrawerContent()}
+        </Drawer>
+      </Box>
     </Box>
   );
 
   const renderContent = () => {
+    if (selectedTab === 0) {
+      switch (billSubView) {
+        case 'create':
+          return <Bill />;
+        case 'records':
+          return (
+            <div>
+              <h2>Show Records</h2>
+            </div>
+          );
+        case 'settings':
+          return (
+            <div>
+              <h2>Bill Settings</h2>
+            </div>
+          );
+        default:
+          return <Bill />;
+      }
+    }
     switch (selectedTab) {
-      case 0:
-        return <Bill />;
       case 1:
         return <Stock />;
       case 2:
@@ -112,75 +292,34 @@ const Dashboard = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: PALETTE.background }}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
+      <Navbar onProfileOpen={() => setProfileOpen(true)} handleDrawerToggle={handleDrawerToggle} isMobile={isMobile} />
+      <Sidebar
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        billSubView={billSubView}
+        setBillSubView={setBillSubView}
+        billDrawerView={billDrawerView}
+        setBillDrawerView={setBillDrawerView}
+        billDrawerOpen={billDrawerOpen}
+        setBillDrawerOpen={setBillDrawerOpen}
+        dateFrom={dateFrom}
+        setDateFrom={setDateFrom}
+        dateTo={dateTo}
+        setDateTo={setDateTo}
+        isMobile={isMobile}
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+        handleDrawerToggle={handleDrawerToggle}
         sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-          bgcolor: 'background.paper',
-          color: 'primary.main',
-          boxShadow: 2,
-          borderBottom: '1px solid #e3e9f7',
+          position: { md: 'fixed' },
+          top: { md: 0 },
+          left: { md: 0 },
+          height: { md: '100vh' },
+          zIndex: 1200,
         }}
-        elevation={0}
-      >
-        <Toolbar sx={{ minHeight: 72 }}>
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: 'none' } }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-          <Typography
-            variant="h5"
-            noWrap
-            component="div"
-            sx={{ flexGrow: 1, textAlign: 'center', fontWeight: 700, letterSpacing: 1 }}
-          >
-            BILLUS
-          </Typography>
-          <IconButton color="primary" sx={{ ml: 2 }} onClick={() => setProfileOpen(true)}>
-            <Avatar alt="Profile" />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-        aria-label="sidebar"
-      >
-        {/* Mobile Drawer */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        {/* Desktop Drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
+      />
       <Box
         component="main"
         sx={{
@@ -189,10 +328,15 @@ const Dashboard = () => {
           width: { md: `calc(100% - ${drawerWidth}px)` },
           mt: 8,
           minHeight: '100vh',
+          background: 'rgba(255,255,255,0.7)',
+          borderRadius: 4,
+          boxShadow: 3,
         }}
       >
         <Paper elevation={0} sx={{ p: { xs: 1, md: 2 }, bgcolor: 'transparent', boxShadow: 'none' }}>
-          {renderContent()}
+          <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+            {renderContent()}
+          </Box>
         </Paper>
         <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
       </Box>

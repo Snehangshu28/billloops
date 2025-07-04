@@ -15,9 +15,16 @@ import {
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useBusiness } from '../../context/BusinessContext';
 
-const COLORS = [
-  '#1976d2', '#388e3c', '#fbc02d', '#d32f2f', '#7b1fa2', '#0288d1', '#c2185b', '#ffa000', '#388e3c', '#303f9f',
-];
+const COLORS = {
+  background: '#F8F9F6',
+  card: '#fff',
+  primary: '#437057',
+  primaryDark: '#2F5249',
+  accent: '#E3DE61',
+  text: '#2F5249',
+  shadow: '0 4px 16px rgba(67,112,87,0.08)',
+};
+const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 const Customer = () => {
   const { data } = useBusiness();

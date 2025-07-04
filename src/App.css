@@ -1,4 +1,5 @@
 /* All styles removed for Tailwind CSS integration. Use Tailwind utility classes in your components. */
+/* @import "tailwindcss"; */
 
 #root {
   max-width: 1280px;
