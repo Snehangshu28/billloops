@@ -1,6 +1,15 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Avatar, useMediaQuery } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Avatar,
+  Button,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { getAuth, signOut } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
 const PALETTE = {
   forest: '#2F5249',
@@ -13,6 +22,19 @@ const FONT = { fontFamily: 'Poppins, sans-serif' };
 const drawerWidth = 220;
 
 const Navbar = ({ onProfileOpen, handleDrawerToggle, isMobile }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      localStorage.clear();
+      navigate('/login'); // Assuming you have a Navigate function to redirect
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -44,16 +66,45 @@ const Navbar = ({ onProfileOpen, handleDrawerToggle, isMobile }) => {
           variant="h5"
           noWrap
           component="div"
-          sx={{ flexGrow: 1, textAlign: 'center', fontWeight: 700, letterSpacing: 1, color: PALETTE.forest, ...FONT }}
+          sx={{
+            flexGrow: 1,
+            textAlign: 'center',
+            fontWeight: 700,
+            letterSpacing: 1,
+            color: PALETTE.forest,
+            ...FONT,
+          }}
         >
           Billoops
         </Typography>
-        <IconButton sx={{ ml: 2, bgcolor: PALETTE.olive, color: '#fff', '&:hover': { bgcolor: PALETTE.moss } }} onClick={onProfileOpen}>
+        <IconButton
+          sx={{
+            ml: 2,
+            bgcolor: PALETTE.olive,
+            color: '#fff',
+            '&:hover': { bgcolor: PALETTE.moss },
+          }}
+          onClick={onProfileOpen}
+        >
           <Avatar alt="Profile" />
         </IconButton>
+        <Button
+          variant="contained"
+          color="error"
+          sx={{
+            ml: 2,
+            bgcolor: '#d32f2f',
+            '&:hover': { bgcolor: '#b71c1c' },
+            textTransform: 'none',
+            fontWeight: 600,
+          }}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
       </Toolbar>
     </AppBar>
   );
 };
 
-export default Navbar; 
+export default Navbar;

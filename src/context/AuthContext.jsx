@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('user');
     localStorage.removeItem('tenant');
   }
-
+  console.log('AuthProvider', 'currentUser', currentUser);
   const value = {
     currentUser,
     tenantData,

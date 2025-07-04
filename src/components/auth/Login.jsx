@@ -63,7 +63,7 @@ export default function Login() {
       await login(form.email, form.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError('user-not-found');
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,16 @@ export default function Login() {
           </Typography>
           <form onSubmit={handleSubmit}>
             {error && (
-              <Typography color="error" sx={{ mb: 1, fontSize: 15 }}>
+              <Typography
+                color="error"
+                sx={{
+                  mb: 1,
+                  fontSize: 15,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 {error}
               </Typography>
             )}

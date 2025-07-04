@@ -114,7 +114,6 @@ function App() {
           <Router>
             <AuthProvider>
               <Routes>
-                <Route path="/" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 {/* <Route
@@ -123,9 +122,9 @@ function App() {
                 /> */}
               </Routes>
               <Routes>
-                {/* <Route path="/" element={<PrivateRoute />}> */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                {/* </Route> */}
+                <Route path="/" element={<PrivateRoute />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
               </Routes>
             </AuthProvider>
           </Router>
