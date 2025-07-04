@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import {
-  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Toolbar, Collapse, useTheme
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Toolbar,
+  Collapse,
+  useTheme,
 } from '@mui/material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
@@ -30,10 +40,14 @@ const tabs = [
 ];
 
 const Sidebar = ({
-  selectedTab, setSelectedTab,
-  billSubView, setBillSubView,
-  isMobile, mobileOpen, setMobileOpen,
-  handleDrawerToggle
+  selectedTab,
+  setSelectedTab,
+  billSubView,
+  setBillSubView,
+  isMobile,
+  mobileOpen,
+  setMobileOpen,
+  handleDrawerToggle,
 }) => {
   const [billMenuOpen, setBillMenuOpen] = useState(false);
 
@@ -79,7 +93,8 @@ const Sidebar = ({
                 sx={{
                   borderRadius: 2,
                   mx: 1,
-                  background: selectedTab === idx ? PALETTE.moss : 'transparent',
+                  background:
+                    selectedTab === idx ? PALETTE.moss : 'transparent',
                   '&:hover': {
                     background: PALETTE.olive,
                     color: '#fff',
@@ -90,28 +105,64 @@ const Sidebar = ({
                   ...FONT,
                 }}
               >
-                <ListItemIcon sx={{ color: '#fff', minWidth: 44 }}>{tab.icon}</ListItemIcon>
+                <ListItemIcon sx={{ color: '#fff', minWidth: 44 }}>
+                  {tab.icon}
+                </ListItemIcon>
                 <ListItemText
                   primary={tab.label}
-                  primaryTypographyProps={{ fontWeight: selectedTab === idx ? 700 : 500, fontSize: 18, ...FONT }}
+                  primaryTypographyProps={{
+                    fontWeight: selectedTab === idx ? 700 : 500,
+                    fontSize: 18,
+                    ...FONT,
+                  }}
                 />
-                {tab.label === 'Bill' ? (billMenuOpen ? <ExpandLess /> : <ExpandMore />) : null}
+                {tab.label === 'Bill' ? (
+                  billMenuOpen ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  )
+                ) : null}
               </ListItemButton>
             </ListItem>
             {tab.label === 'Bill' && (
               <Collapse in={billMenuOpen} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding sx={{ pl: 4 }}>
-                  <ListItemButton onClick={() => handleBillSubmenuClick(0)} sx={{ borderRadius: 2, mb: 1, ...FONT }}>
-                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}><ReceiptLongIcon /></ListItemIcon>
-                    <ListItemText primary="Create Bill" primaryTypographyProps={{ fontSize: 16, ...FONT }} />
+                  <ListItemButton
+                    onClick={() => handleBillSubmenuClick(0)}
+                    sx={{ borderRadius: 2, mb: 1, ...FONT }}
+                  >
+                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                      <ReceiptLongIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Create Bill"
+                      primaryTypographyProps={{ fontSize: 16, ...FONT }}
+                    />
                   </ListItemButton>
-                  <ListItemButton onClick={() => handleBillSubmenuClick(1)} sx={{ borderRadius: 2, mb: 1, ...FONT }}>
-                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}><HistoryIcon /></ListItemIcon>
-                    <ListItemText primary="Show Records" primaryTypographyProps={{ fontSize: 16, ...FONT }} />
+                  <ListItemButton
+                    onClick={() => handleBillSubmenuClick(1)}
+                    sx={{ borderRadius: 2, mb: 1, ...FONT }}
+                  >
+                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                      <HistoryIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Show Records"
+                      primaryTypographyProps={{ fontSize: 16, ...FONT }}
+                    />
                   </ListItemButton>
-                  <ListItemButton onClick={() => handleBillSubmenuClick(2)} sx={{ borderRadius: 2, ...FONT }}>
-                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}><SettingsIcon /></ListItemIcon>
-                    <ListItemText primary="Bill Settings" primaryTypographyProps={{ fontSize: 16, ...FONT }} />
+                  <ListItemButton
+                    onClick={() => handleBillSubmenuClick(2)}
+                    sx={{ borderRadius: 2, ...FONT }}
+                  >
+                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                      <SettingsIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Bill Settings"
+                      primaryTypographyProps={{ fontSize: 16, ...FONT }}
+                    />
                   </ListItemButton>
                 </List>
               </Collapse>
@@ -153,4 +204,4 @@ const Sidebar = ({
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

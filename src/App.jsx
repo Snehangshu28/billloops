@@ -123,7 +123,7 @@ function App() {
               </Routes>
               <Routes>
                 <Route path="/" element={<PrivateRoute />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/" element={<Dashboard />} />
                 </Route>
               </Routes>
             </AuthProvider>

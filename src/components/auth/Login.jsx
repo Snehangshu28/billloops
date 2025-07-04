@@ -61,7 +61,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(form.email, form.password);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setError('user-not-found');
     } finally {
