@@ -11,6 +11,8 @@ import Dashboard from './components/dashboard/Dashboard';
 import { BusinessProvider } from './context/BusinessContext';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
+import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
 
 const theme = createTheme({
   palette: {
@@ -110,13 +112,22 @@ function App() {
       >
         <BusinessProvider>
           <Router>
-            <Routes>
-              <Route path="/onboarding/*" element={<Onboarding />} />
-              <Route path="/dashboard/*" element={<Dashboard />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="*" element={<Navigate to="/onboarding" replace />} />
-            </Routes>
+            <AuthProvider>
+              <Routes>
+                <Route path="/" element={<Signup />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                {/* <Route
+                  path="*"
+                  element={<Navigate to="/onboarding" replace />}
+                /> */}
+              </Routes>
+              <Routes>
+                {/* <Route path="/" element={<PrivateRoute />}> */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                {/* </Route> */}
+              </Routes>
+            </AuthProvider>
           </Router>
         </BusinessProvider>
       </div>
