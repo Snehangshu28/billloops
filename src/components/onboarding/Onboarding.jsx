@@ -15,18 +15,20 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { Business, Store, Restaurant, LocalHospital, School, Build, Spa } from '@mui/icons-material';
+import {
+  Business,
+  Store,
+  Restaurant,
+  LocalHospital,
+  School,
+  Build,
+  Spa,
+} from '@mui/icons-material';
 import { useBusiness } from '../../context/BusinessContext';
 import { useNavigate } from 'react-router-dom';
 
 const categories = [
   { label: 'Beauty & Wellness', icon: <Spa fontSize="large" /> },
-  { label: 'Retail', icon: <Store fontSize="large" /> },
-  { label: 'Restaurant', icon: <Restaurant fontSize="large" /> },
-  { label: 'Healthcare', icon: <LocalHospital fontSize="large" /> },
-  { label: 'Education', icon: <School fontSize="large" /> },
-  { label: 'Manufacturing', icon: <Build fontSize="large" /> },
-  { label: 'Other', icon: <Business fontSize="large" /> },
 ];
 
 const subcategories = {
@@ -61,7 +63,9 @@ const Onboarding = () => {
   const { data, updateOnboarding } = useBusiness();
   const [activeStep, setActiveStep] = useState(0);
   const [category, setCategory] = useState(data.onboarding.category || '');
-  const [selectedSubs, setSelectedSubs] = useState(data.onboarding.subcategories || []);
+  const [selectedSubs, setSelectedSubs] = useState(
+    data.onboarding.subcategories || []
+  );
   const [form, setForm] = useState(data.onboarding.businessInfo || initialForm);
   const isMobile = useMediaQuery('(max-width:600px)');
   const navigate = useNavigate();
@@ -96,7 +100,13 @@ const Onboarding = () => {
       subcategories: selectedSubs,
       businessInfo: form,
     });
-    navigate('/dashboard');
+    navigate('/signup', {
+      state: {
+        category,
+        subcategories: selectedSubs,
+        businessInfo: form,
+      },
+    });
   };
 
   // Step content
@@ -110,12 +120,17 @@ const Onboarding = () => {
                 <Card
                   variant={category === cat.label ? 'elevation' : 'outlined'}
                   sx={{
-                    border: category === cat.label ? '2px solid #1976d2' : '1px solid #ccc',
+                    border:
+                      category === cat.label
+                        ? '2px solid #1976d2'
+                        : '1px solid #ccc',
                     boxShadow: category === cat.label ? 4 : 0,
                     transition: '0.2s',
                   }}
                 >
-                  <CardActionArea onClick={() => handleCategorySelect(cat.label)}>
+                  <CardActionArea
+                    onClick={() => handleCategorySelect(cat.label)}
+                  >
                     <CardContent sx={{ textAlign: 'center' }}>
                       {cat.icon}
                       <Typography variant="subtitle1" sx={{ mt: 1 }}>
@@ -134,7 +149,9 @@ const Onboarding = () => {
             {(subcategories[category] || []).map((sub) => (
               <Grid item xs={12} sm={6} md={3} key={sub}>
                 <Card
-                  variant={selectedSubs.includes(sub) ? 'elevation' : 'outlined'}
+                  variant={
+                    selectedSubs.includes(sub) ? 'elevation' : 'outlined'
+                  }
                   sx={{
                     border: selectedSubs.includes(sub)
                       ? '2px solid #1976d2'
@@ -160,7 +177,10 @@ const Onboarding = () => {
         );
       case 2:
         return (
-          <Box component="form" sx={{ mt: 2, width: isMobile ? '100%' : 400, mx: 'auto' }}>
+          <Box
+            component="form"
+            sx={{ mt: 2, width: isMobile ? '100%' : 400, mx: 'auto' }}
+          >
             <TextField
               label="Business Name"
               name="name"
@@ -211,17 +231,26 @@ const Onboarding = () => {
     if (activeStep === 1) return selectedSubs.length > 0;
     if (activeStep === 2)
       return (
-        form.name.trim() &&
-        form.address.trim() &&
-        form.phone.trim() &&
-        form.email.trim()
+        (form.name || '').trim() &&
+        (form.address || '').trim() &&
+        (form.phone || '').trim() &&
+        (form.email || '').trim()
       );
     return false;
   };
 
   return (
     <Container maxWidth="md" sx={{ py: isMobile ? 2 : 6 }}>
-      <Box sx={{ maxWidth: 700, mx: 'auto', bgcolor: '#fff', p: isMobile ? 2 : 4, borderRadius: 3, boxShadow: 3 }}>
+      <Box
+        sx={{
+          maxWidth: 700,
+          mx: 'auto',
+          bgcolor: '#fff',
+          p: isMobile ? 2 : 4,
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
         <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
           {steps.map((label) => (
             <Step key={label}>
@@ -231,7 +260,11 @@ const Onboarding = () => {
         </Stepper>
         {renderStep()}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined">
+          <Button
+            disabled={activeStep === 0}
+            onClick={handleBack}
+            variant="outlined"
+          >
             Back
           </Button>
           {activeStep < steps.length - 1 ? (
@@ -257,4 +290,4 @@ const Onboarding = () => {
   );
 };
 
-export default Onboarding; 
+export default Onboarding;

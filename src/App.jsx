@@ -1,9 +1,16 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import Onboarding from './components/onboarding/Onboarding';
 import Dashboard from './components/dashboard/Dashboard';
 import { BusinessProvider } from './context/BusinessContext';
+import Login from './components/auth/Login';
+import Signup from './components/auth/Signup';
 
 const theme = createTheme({
   palette: {
@@ -84,12 +91,19 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e3e9f7 0%, #f4f6fb 100%)' }}>
+      <div
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #e3e9f7 0%, #f4f6fb 100%)',
+        }}
+      >
         <BusinessProvider>
           <Router>
             <Routes>
               <Route path="/onboarding/*" element={<Onboarding />} />
               <Route path="/dashboard/*" element={<Dashboard />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="*" element={<Navigate to="/onboarding" replace />} />
             </Routes>
           </Router>

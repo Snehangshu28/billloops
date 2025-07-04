@@ -19,6 +19,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "bootstrap": "^5.3.7",
     "date-fns": "^4.1.0",
+    "firebase": "^11.10.0",
     "formik": "^2.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
