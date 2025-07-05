@@ -87,12 +87,13 @@ const Stock = () => {
             Add Product
           </Button>
         </Stack>
-        <TableContainer sx={{ borderRadius: 3, boxShadow: 2 }}>
+        <TableContainer sx={{  boxShadow: 2 }}>
           <Table size="medium">
             <TableHead>
               <TableRow sx={{ bgcolor: '#f0f3fa' }}>
                 <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Quantity</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Price</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 700, fontSize: 16 }}>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -115,6 +116,7 @@ const Stock = () => {
                   >
                     <TableCell>{product.name}</TableCell>
                     <TableCell>{product.quantity}</TableCell>
+                    <TableCell>{product.price}</TableCell>
                     <TableCell align="center">
                       <Tooltip title="Edit">
                         <IconButton color="primary" onClick={() => handleOpen(idx)}>
@@ -133,37 +135,102 @@ const Stock = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 4, boxShadow: 6 } }}>
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs" PaperProps={{ sx: {  boxShadow: 6 } }}>
           <DialogTitle sx={{ fontWeight: 700 }}>{editIdx !== null ? 'Edit Product' : 'Add Product'}</DialogTitle>
           <DialogContent>
-            <Stack spacing={2}>
-              <TextField
-                label="Product Name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                fullWidth
-                variant="filled"
-                required
-              />
-              <TextField
-                label="Quantity"
-                name="quantity"
-                value={form.quantity}
-                onChange={handleChange}
-                fullWidth
-                variant="filled"
-                required
-                type="number"
-              />
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSave} variant="contained" size="large" sx={{ borderRadius: 2, fontWeight: 600 }} disabled={!form.name || !form.quantity}>
-              Save
-            </Button>
-          </DialogActions>
+  <Stack spacing={3} mt={1}>
+    <Box>
+      <Typography sx={{ fontWeight: 600, mb: 1, color: COLORS.text }}>Product Name</Typography>
+      <TextField
+        placeholder="Enter product name"
+        name="name"
+        value={form.name}
+        onChange={handleChange}
+        fullWidth
+        variant="outlined"
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '12px',
+            bgcolor: '#FAFAFA',
+          },
+        }}
+        required
+      />
+    </Box>
+    <Box>
+      <Typography sx={{ fontWeight: 600, mb: 1, color: COLORS.text }}>Quantity</Typography>
+      <TextField
+        placeholder="Enter quantity"
+        name="quantity"
+        value={form.quantity}
+        onChange={handleChange}
+        fullWidth
+        variant="outlined"
+        type="number"
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '12px',
+            bgcolor: '#FAFAFA',
+          },
+        }}
+        required
+      />
+    </Box>
+    <Box>
+      <Typography sx={{ fontWeight: 600, mb: 1, color: COLORS.text }}>Price</Typography>
+      <TextField
+        placeholder="Enter Price"
+        name="price"
+        value={form.price}
+        onChange={handleChange}
+        fullWidth
+        variant="outlined"
+        type="number"
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '12px',
+            bgcolor: '#FAFAFA',
+          },
+        }}
+        required
+      />
+    </Box>
+  </Stack>
+</DialogContent>
+
+<DialogActions sx={{ px: 3, pb: 3 }}>
+  <Button
+    onClick={handleClose}
+    variant="outlined"
+    size="large"
+    sx={{
+      
+      fontWeight: 600,
+      textTransform: 'none',
+      color: COLORS.primaryDark,
+      borderColor: COLORS.primary,
+      '&:hover': { backgroundColor: '#f2f4f7' },
+    }}
+  >
+    Cancel
+  </Button>
+  <Button
+    onClick={handleSave}
+    variant="contained"
+    size="large"
+    disabled={!form.name || !form.price}
+    sx={{
+      
+      fontWeight: 600,
+      textTransform: 'none',
+      backgroundColor: COLORS.primary,
+      '&:hover': { backgroundColor: COLORS.primaryDark },
+    }}
+  >
+    {editIdx !== null ? 'Update' : 'Save'}
+  </Button>
+</DialogActions>
+
         </Dialog>
       </Paper>
     </Box>

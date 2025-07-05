@@ -1,126 +1,167 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
-  Box,
+  Card,
+  CardContent,
   Typography,
-  Paper,
-  Button,
-  TextField,
+  Grid,
+  Box,
+  LinearProgress,
   Stack,
-  List,
-  ListItem,
-  ListItemText,
-  Checkbox,
-  Divider,
 } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { useBusiness } from '../../context/BusinessContext';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 
-const COLORS = {
-  background: '#F8F9F6',
-  card: '#fff',
-  primary: '#437057',
-  primaryDark: '#2F5249',
-  accent: '#E3DE61',
-  text: '#2F5249',
-  shadow: '0 4px 16px rgba(67,112,87,0.08)',
-};
-const FONT = { fontFamily: 'Poppins, sans-serif' };
+const dataSummary = [
+  { title: 'Balance', value: '$4,800', color: '#0066FF' },
+  { title: 'Sales', value: '$4,567', color: '#FF5C93' },
+  { title: 'Revenue', value: '$8,600', color: '#FFC93E' },
+];
 
-const Customer = () => {
-  const { data } = useBusiness();
-  // Assume data.bills is an array of all bills with client info
-  const bills = data.allBills || [];
+const activityData = [
+  { name: 'Online Store', value: 3000, color: '#0066FF' },
+  { name: 'Retail', value: 800, color: '#FFC93E' },
+  { name: 'Other', value: 900, color: '#FF5C93' },
+];
 
-  // Aggregate customer frequency
-  const customerStats = useMemo(() => {
-    const freq = {};
-    bills.forEach(bill => {
-      const name = bill.client?.name || 'Unknown';
-      if (!freq[name]) freq[name] = { count: 0, contact: bill.client?.contact || '', name };
-      freq[name].count += 1;
-    });
-    return Object.values(freq).sort((a, b) => b.count - a.count);
-  }, [bills]);
+const salesData = [
+  { name: 'Jan', thisMonth: 15, lastMonth: 12 },
+  { name: 'Feb', thisMonth: 20, lastMonth: 18 },
+  { name: 'Mar', thisMonth: 10, lastMonth: 15 },
+  { name: 'Apr', thisMonth: 22, lastMonth: 19 },
+];
 
-  // Top 50 customers
-  const topCustomers = customerStats.slice(0, 50);
-  const [selected, setSelected] = useState([]);
-  const [message, setMessage] = useState('');
-  const [sent, setSent] = useState(false);
+const revenueReport = [
+  { month: 'Jan', billCount: 18, billValue: 12 },
+  { month: 'Feb', billCount: 22, billValue: 15 },
+  { month: 'Mar', billCount: 19, billValue: 13 },
+  { month: 'Apr', billCount: 24, billValue: 17 },
+];
 
-  const handleToggle = (name) => {
-    setSelected((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
-    );
-  };
+const topProducts = [
+  { name: 'Skeyndor Cleanser', value: 210, percentage: 54 },
+  { name: 'Hair Spa Cream', value: 110, percentage: 48 },
+];
 
-  const handleSend = () => {
-    // Here you would integrate with an SMS/email API
-    setSent(true);
-    setTimeout(() => setSent(false), 2000);
-  };
-
+const Dashboard = () => {
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', my: 3 }}>
-      <Typography variant="h4" gutterBottom>Customer Analysis</Typography>
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>Top 50 Customers (by frequency)</Typography>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={topCustomers} layout="vertical" margin={{ left: 40, right: 20, top: 10, bottom: 10 }}>
-            <XAxis type="number" allowDecimals={false} hide />
-            <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Bar dataKey="count">
-              {topCustomers.map((entry, idx) => (
-                <Cell key={entry.name} fill={COLORS[idx % COLORS.length]} />
+    <Box sx={{ p: 4, bgcolor: '#F5F6FA', minHeight: '100vh' }}>
+      <Grid container spacing={3}>
+
+        {/* Summary Cards */}
+        {dataSummary.map((item, idx) => (
+          <Grid item xs={12} sm={4} key={idx}>
+            <Card sx={{ bgcolor: item.color, color: '#fff',  boxShadow: 3 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle2" fontWeight={500} sx={{ opacity: 0.85 }}>{item.title}</Typography>
+                <Typography variant="h4" fontWeight={700} mt={1}>{item.value}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+
+        {/* Activity Chart */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{  boxShadow: 2, minHeight: 300 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography fontWeight={600} mb={2}>Activity</Typography>
+              <Box display="flex" justifyContent="center">
+                <PieChart width={220} height={220}>
+                  <Pie
+                    data={activityData}
+                    dataKey="value"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={70}
+                    label
+                  >
+                    {activityData.map((entry, index) => (
+                      <Cell key={index} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Top Products */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{  boxShadow: 2, minHeight: 300 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography fontWeight={600} mb={2}>Top Products</Typography>
+              {topProducts.map((prod, idx) => (
+                <Box key={idx} mb={3}>
+                  <Typography fontWeight={600}>{prod.name}</Typography>
+                  <Typography variant="body2" color="text.secondary" mb={0.5}>Value: ${prod.value}</Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={prod.percentage}
+                    sx={{ height: 8, borderRadius: 4 }}
+                  />
+                </Box>
               ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </Paper>
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>Select Customers to Send Offer</Typography>
-        <List dense sx={{ maxHeight: 300, overflow: 'auto', mb: 2 }}>
-          {topCustomers.map((cust, idx) => (
-            <ListItem key={cust.name} secondaryAction={
-              <Checkbox
-                edge="end"
-                onChange={() => handleToggle(cust.name)}
-                checked={selected.includes(cust.name)}
-                sx={{ color: COLORS[idx % COLORS.length] }}
-              />
-            }>
-              <ListItemText
-                primary={<span style={{ color: COLORS[idx % COLORS.length], fontWeight: 500 }}>{cust.name}</span>}
-                secondary={`Contact: ${cust.contact || 'N/A'} | Visits: ${cust.count}`}
-              />
-            </ListItem>
-          ))}
-        </List>
-        <Divider sx={{ my: 2 }} />
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
-          <TextField
-            label="Offer Message"
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            fullWidth
-            multiline
-            minRows={2}
-            sx={{ flex: 1 }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            disabled={selected.length === 0 || !message}
-            onClick={handleSend}
-          >
-            Send Message
-          </Button>
-        </Stack>
-        {sent && <Typography color="success.main" sx={{ mt: 2 }}>Message sent to selected customers!</Typography>}
-      </Paper>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Sales Overview */}
+        <Grid item xs={12} md={8}>
+          <Card sx={{  boxShadow: 2, minHeight: 400 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography fontWeight={600} mb={2}>Sales Overview</Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={salesData}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="thisMonth" stroke="#0066FF" strokeWidth={3} />
+                  <Line type="monotone" dataKey="lastMonth" stroke="#FF5C93" strokeDasharray="3 3" />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Average Payment */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{  boxShadow: 2, textAlign: 'center', py: 5, }}>
+            <Typography variant="h3" fontWeight={700}>70%</Typography>
+            <Typography mt={1} fontWeight={500}>Average Payment</Typography>
+          </Card>
+        </Grid>
+
+        {/* Revenue Report */}
+        <Grid item xs={12}>
+          <Card sx={{  boxShadow: 2, minHeight: 400 }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography fontWeight={600} mb={2}>Revenue Report</Typography>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={revenueReport}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="billCount" fill="#00C49F" />
+                  <Bar dataKey="billValue" fill="#FF8042" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+      </Grid>
     </Box>
   );
 };
 
-export default Customer; 
+export default Dashboard;

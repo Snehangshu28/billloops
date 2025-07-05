@@ -21,6 +21,7 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const drawerWidth = 220;
 const PALETTE = {
@@ -37,6 +38,7 @@ const tabs = [
   { label: 'Employee', icon: <PeopleIcon sx={{ fontSize: 30 }} /> },
   { label: 'Analysis', icon: <BarChartIcon sx={{ fontSize: 30 }} /> },
   { label: 'Customer', icon: <GroupIcon sx={{ fontSize: 30 }} /> },
+{ label: 'Offer', icon: <LocalOfferIcon sx={{ fontSize: 30 }} /> }
 ];
 
 const Sidebar = ({
