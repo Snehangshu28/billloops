@@ -18,13 +18,19 @@ import {
   Typography,
   Tooltip,
   Stack,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useBusiness } from '../../context/BusinessContext';
+import { db } from '../../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
-const initialProduct = { name: '', quantity: '' };
+const initialProduct = { name: '', quantity: '', price: '', category: '' };
 
 const COLORS = {
   background: '#F8F9F6',
@@ -43,6 +49,17 @@ const Stock = () => {
   const [open, setOpen] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
   const [form, setForm] = useState(initialProduct);
+  const [categories, setCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(true);
+
+  useEffect(() => {
+    // Real-time listener for categories
+    const unsub = onSnapshot(collection(db, 'categories'), (snapshot) => {
+      setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setCatLoading(false);
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     setProducts(data.stock);
@@ -91,6 +108,7 @@ const Stock = () => {
           <Table size="medium">
             <TableHead>
               <TableRow sx={{ bgcolor: '#f0f3fa' }}>
+                <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Category</TableCell>
                 <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Quantity</TableCell>
                 <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Price</TableCell>
@@ -100,7 +118,7 @@ const Stock = () => {
             <TableBody>
               {products.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
+                  <TableCell colSpan={5} align="center">
                     No products added yet.
                   </TableCell>
                 </TableRow>
@@ -114,6 +132,7 @@ const Stock = () => {
                       transition: 'background 0.2s',
                     }}
                   >
+                    <TableCell>{product.category}</TableCell>
                     <TableCell>{product.name}</TableCell>
                     <TableCell>{product.quantity}</TableCell>
                     <TableCell>{product.price}</TableCell>
@@ -139,6 +158,28 @@ const Stock = () => {
           <DialogTitle sx={{ fontWeight: 700 }}>{editIdx !== null ? 'Edit Product' : 'Add Product'}</DialogTitle>
           <DialogContent>
   <Stack spacing={3} mt={1}>
+    <Box>
+      <FormControl fullWidth required>
+        <InputLabel id="category-label">Category</InputLabel>
+        <Select
+          labelId="category-label"
+          label="Category"
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+        >
+          {catLoading ? (
+            <MenuItem value="" disabled>Loading...</MenuItem>
+          ) : categories.length === 0 ? (
+            <MenuItem value="" disabled>No categories</MenuItem>
+          ) : (
+            categories.map((cat) => (
+              <MenuItem key={cat.id} value={cat.name}>{cat.name}</MenuItem>
+            ))
+          )}
+        </Select>
+      </FormControl>
+    </Box>
     <Box>
       <Typography sx={{ fontWeight: 600, mb: 1, color: COLORS.text }}>Product Name</Typography>
       <TextField

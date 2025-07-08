@@ -34,11 +34,11 @@ const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 const tabs = [
   { label: 'Bill', icon: <ReceiptLongIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Stock', icon: <Inventory2Icon sx={{ fontSize: 30 }} /> },
+  { label: 'Master', icon: <SettingsIcon sx={{ fontSize: 30 }} /> },
   { label: 'Employee', icon: <PeopleIcon sx={{ fontSize: 30 }} /> },
   { label: 'Analysis', icon: <BarChartIcon sx={{ fontSize: 30 }} /> },
   { label: 'Customer', icon: <GroupIcon sx={{ fontSize: 30 }} /> },
-{ label: 'Offer', icon: <LocalOfferIcon sx={{ fontSize: 30 }} /> }
+  { label: 'Offer', icon: <LocalOfferIcon sx={{ fontSize: 30 }} /> }
 ];
 
 const Sidebar = ({
@@ -50,12 +50,21 @@ const Sidebar = ({
   mobileOpen,
   setMobileOpen,
   handleDrawerToggle,
+  masterSubView,
+  setMasterSubView,
 }) => {
   const [billMenuOpen, setBillMenuOpen] = useState(false);
+  const [masterMenuOpen, setMasterMenuOpen] = useState(false);
 
   const handleTabClick = (idx) => {
     if (tabs[idx].label === 'Bill') {
       setBillMenuOpen((open) => !open);
+    } else if (tabs[idx].label === 'Master') {
+      setMasterMenuOpen((open) => !open);
+    } else if (tabs[idx].label === 'Stock') {
+      setSelectedTab(idx);
+      if (setMasterSubView) setMasterSubView(1); // Stock subview
+      if (isMobile) setMobileOpen(false);
     } else {
       setSelectedTab(idx);
       if (isMobile) setMobileOpen(false);
@@ -69,6 +78,12 @@ const Sidebar = ({
       if (submenuIdx === 1) setBillSubView('records');
       if (submenuIdx === 2) setBillSubView('settings');
     }
+    if (isMobile) setMobileOpen(false);
+  };
+
+  const handleMasterSubmenuClick = (submenuIdx) => {
+    setSelectedTab(1); // Always Master tab
+    if (setMasterSubView) setMasterSubView(submenuIdx);
     if (isMobile) setMobileOpen(false);
   };
 
@@ -125,6 +140,9 @@ const Sidebar = ({
                     <ExpandMore />
                   )
                 ) : null}
+                {tab.label === 'Master' ? (
+                  masterMenuOpen ? <ExpandLess /> : <ExpandMore />
+                ) : null}
               </ListItemButton>
             </ListItem>
             {tab.label === 'Bill' && (
@@ -163,6 +181,36 @@ const Sidebar = ({
                     </ListItemIcon>
                     <ListItemText
                       primary="Bill Settings"
+                      primaryTypographyProps={{ fontSize: 16, ...FONT }}
+                    />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            )}
+            {tab.label === 'Master' && (
+              <Collapse in={masterMenuOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding sx={{ pl: 4 }}>
+                  <ListItemButton
+                    onClick={() => handleMasterSubmenuClick(0)}
+                    sx={{ borderRadius: 2, mb: 1, ...FONT }}
+                  >
+                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                      <Inventory2Icon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Product Category"
+                      primaryTypographyProps={{ fontSize: 16, ...FONT }}
+                    />
+                  </ListItemButton>
+                  <ListItemButton
+                    onClick={() => handleMasterSubmenuClick(1)}
+                    sx={{ borderRadius: 2, ...FONT }}
+                  >
+                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                      <Inventory2Icon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary="Stock"
                       primaryTypographyProps={{ fontSize: 16, ...FONT }}
                     />
                   </ListItemButton>

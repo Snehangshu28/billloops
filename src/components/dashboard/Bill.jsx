@@ -345,277 +345,284 @@ const Bill = () => {
         </DialogActions>
       </Dialog>
       {/* Editable Form Only (no invoice preview) */}
-      <Paper sx={{ p: { xs: 2, md: 4 }, mt: 3 }} elevation={3}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={8}>
+      <Stack spacing={3} sx={{ mt: 3 }}>
+        {/* Business Info Section */}
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Business Information</Typography>
+          <Stack spacing={2}>
             <TextField
               label="Business Name"
               name="name"
               value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
               fullWidth
               variant="standard"
-              InputProps={{ sx: { fontWeight: 700, fontSize: 24 }, readOnly: true }}
+              slotProps={{ input: { sx: { fontWeight: 700, fontSize: 24 } } }}
             />
             <TextField
               label="Business Address"
               name="address"
               value={businessAddress}
+              onChange={(e) => setBusinessAddress(e.target.value)}
               fullWidth
               variant="standard"
-              sx={{ mt: 1 }}
-              InputProps={{ readOnly: true }}
             />
             <TextField
               label="Business Email"
               name="email"
               value={businessEmail}
+              onChange={(e) => setBusinessEmail(e.target.value)}
               fullWidth
               variant="standard"
-              sx={{ mt: 1 }}
-              InputProps={{ readOnly: true }}
             />
             <TextField
               label="Business Phone"
               name="phone"
               value={businessPhone}
+              onChange={(e) => setBusinessPhone(e.target.value)}
               fullWidth
               variant="standard"
-              sx={{ mt: 1 }}
-              InputProps={{ readOnly: true }}
             />
-          </Grid>
-        </Grid>
-        <Divider sx={{ my: 2 }} />
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              label="Client Name"
-              name="name"
-              value={bill.client.name}
-              onChange={handleClientChange}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              label="Date"
-              name="date"
-              type="date"
-              value={bill.client.date}
-              onChange={handleClientChange}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              label="Invoice #"
-              name="invoice"
-              value={bill.client.invoice}
-              onChange={handleClientChange}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              label="Client Address"
-              name="address"
-              value={bill.client.address}
-              onChange={handleClientChange}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              label="Customer Contact Number"
-              name="contact"
-              value={bill.client.contact || ''}
-              onChange={handleClientChange}
-              fullWidth
-            />
-          </Grid>
-        </Grid>
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Services
-        </Typography>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Description</TableCell>
-                <TableCell>Staff</TableCell>
-                <TableCell>Rate (₹)</TableCell>
-                <TableCell>Quantity</TableCell>
-                <TableCell>Subtotal (₹)</TableCell>
-                <TableCell align="center">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(bill.services || []).map((row, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>
-                    <TextField
-                      value={row.description}
-                      onChange={(e) => handleServiceChange(idx, 'description', e.target.value)}
-                      placeholder="Description"
-                      variant="standard"
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormControl fullWidth variant="standard">
-                      <Select
-                        value={row.staff || ''}
-                        onChange={e => handleServiceChange(idx, 'staff', e.target.value)}
-                        displayEmpty
-                      >
-                        <MenuItem value=""><em>None</em></MenuItem>
-                        {employees.map((emp, i) => (
-                          <MenuItem value={emp.name} key={i}>{emp.name}</MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={row.rate}
-                      onChange={(e) => handleServiceChange(idx, 'rate', e.target.value)}
-                      placeholder="Rate"
-                      variant="standard"
-                      type="number"
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={row.quantity}
-                      onChange={(e) => handleServiceChange(idx, 'quantity', e.target.value)}
-                      placeholder="Qty"
-                      variant="standard"
-                      type="number"
-                      fullWidth
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      value={calcSubtotal(row)}
-                      variant="standard"
-                      type="number"
-                      fullWidth
-                      InputProps={{ readOnly: true }}
-                    />
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      color="error"
-                      onClick={() => handleRemoveService(idx)}
-                      disabled={bill.services.length === 1}
-                    >
-                      <RemoveCircleOutlineIcon />
-                    </IconButton>
-                    {idx === bill.services.length - 1 && (
-                      <IconButton color="primary" onClick={handleAddService}>
-                        <AddCircleOutlineIcon />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Discount (%)"
-              value={bill.discount}
-              onChange={handleDiscountChange}
-              type="number"
-              fullWidth
-              inputProps={{ min: 0, max: 100 }}
-              helperText={`Discount: ₹${discountAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              label="CGST (%)"
-              value={cgst}
-              onChange={e => setCgst(e.target.value)}
-              type="number"
-              fullWidth
-              inputProps={{ min: 0, max: 100 }}
-              helperText={`CGST: ₹${cgstAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              label="SGST (%)"
-              value={sgst}
-              onChange={e => setSgst(e.target.value)}
-              type="number"
-              fullWidth
-              inputProps={{ min: 0, max: 100 }}
-              helperText={`SGST: ₹${sgstAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Bank Name"
-              name="bank"
-              value={bill.business.bank}
-              onChange={handleBankChange}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              label="Account Number"
-              name="account"
-              value={bill.business.account}
-              onChange={handleBankChange}
-              fullWidth
-            />
-          </Grid>
-        </Grid>
-        <Divider sx={{ my: 2 }} />
-        <Grid container alignItems="center" sx={{ mb: 2 }}>
-          <Grid item xs={12} sm={6} md={4}>
-            <FormControl fullWidth>
-              <InputLabel id="payment-mode-label">Payment Mode</InputLabel>
-              <Select
-                labelId="payment-mode-label"
-                name="paymentMode"
-                value={bill.client.paymentMode || ''}
-                label="Payment Mode"
+          </Stack>
+        </Paper>
+        {/* Client Info Section */}
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Client Information</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Client Name"
+                name="name"
+                value={bill.client.name}
                 onChange={handleClientChange}
-              >
-                {paymentModes.map((mode) => (
-                  <MenuItem value={mode.value} key={mode.value}>{mode.label}</MenuItem>
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Date"
+                name="date"
+                type="date"
+                value={bill.client.date}
+                onChange={handleClientChange}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Invoice #"
+                name="invoice"
+                value={bill.client.invoice}
+                onChange={handleClientChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={6}>
+              <TextField
+                label="Client Address"
+                name="address"
+                value={bill.client.address}
+                onChange={handleClientChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={6}>
+              <TextField
+                label="Customer Contact Number"
+                name="contact"
+                value={bill.client.contact || ''}
+                onChange={handleClientChange}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
+        </Paper>
+        {/* Services Table Section */}
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Services</Typography>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Staff</TableCell>
+                  <TableCell>Rate (₹)</TableCell>
+                  <TableCell>Quantity</TableCell>
+                  <TableCell>Subtotal (₹)</TableCell>
+                  <TableCell align="center">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(bill.services || []).map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <TextField
+                        value={row.description}
+                        onChange={(e) => handleServiceChange(idx, 'description', e.target.value)}
+                        placeholder="Description"
+                        variant="standard"
+                        fullWidth
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormControl fullWidth variant="standard">
+                        <Select
+                          value={row.staff || ''}
+                          onChange={e => handleServiceChange(idx, 'staff', e.target.value)}
+                          displayEmpty
+                        >
+                          <MenuItem value=""><em>None</em></MenuItem>
+                          {employees.map((emp, i) => (
+                            <MenuItem value={emp.name} key={i}>{emp.name}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        value={row.rate}
+                        onChange={(e) => handleServiceChange(idx, 'rate', e.target.value)}
+                        placeholder="Rate"
+                        variant="standard"
+                        type="number"
+                        fullWidth
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        value={row.quantity}
+                        onChange={(e) => handleServiceChange(idx, 'quantity', e.target.value)}
+                        placeholder="Qty"
+                        variant="standard"
+                        type="number"
+                        fullWidth
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        value={calcSubtotal(row)}
+                        variant="standard"
+                        type="number"
+                        fullWidth
+                        slotProps={{ input: { readOnly: true } }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        color="error"
+                        onClick={() => handleRemoveService(idx)}
+                        disabled={bill.services.length === 1}
+                      >
+                        <RemoveCircleOutlineIcon />
+                      </IconButton>
+                      {idx === bill.services.length - 1 && (
+                        <IconButton color="primary" onClick={handleAddService}>
+                          <AddCircleOutlineIcon />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Select>
-            </FormControl>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+        {/* Billing Details Section */}
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom>Billing Details</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Discount (%)"
+                value={bill.discount}
+                onChange={handleDiscountChange}
+                type="number"
+                fullWidth
+                inputProps={{ min: 0, max: 100 }}
+                helperText={`Discount: ₹${discountAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
+              <TextField
+                label="CGST (%)"
+                value={cgst}
+                onChange={e => setCgst(e.target.value)}
+                type="number"
+                fullWidth
+                inputProps={{ min: 0, max: 100 }}
+                helperText={`CGST: ₹${cgstAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
+              <TextField
+                label="SGST (%)"
+                value={sgst}
+                onChange={e => setSgst(e.target.value)}
+                type="number"
+                fullWidth
+                inputProps={{ min: 0, max: 100 }}
+                helperText={`SGST: ₹${sgstAmount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Bank Name"
+                name="bank"
+                value={bill.business.bank}
+                onChange={handleBankChange}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Account Number"
+                name="account"
+                value={bill.business.account}
+                onChange={handleBankChange}
+                fullWidth
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} md={8}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
-              <Typography variant="h6" sx={{ mr: 2 }}>
-                Total (INR):
-              </Typography>
-              <Typography variant="h5" color="primary" sx={{ minWidth: 120, textAlign: 'right' }}>
-                ₹ {total >= 0 ? total.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0.00'}
-              </Typography>
-            </Box>
+          <Divider sx={{ my: 2 }} />
+          <Grid container alignItems="center" sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={6} md={4}>
+              <FormControl fullWidth>
+                <InputLabel id="payment-mode-label">Payment Mode</InputLabel>
+                <Select
+                  labelId="payment-mode-label"
+                  name="paymentMode"
+                  value={bill.client.paymentMode || ''}
+                  label="Payment Mode"
+                  onChange={handleClientChange}
+                >
+                  {paymentModes.map((mode) => (
+                    <MenuItem value={mode.value} key={mode.value}>{mode.label}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={8}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
+                <Typography variant="h6" sx={{ mr: 2 }}>
+                  Total (INR):
+                </Typography>
+                <Typography variant="h5" color="primary" sx={{ minWidth: 120, textAlign: 'right' }}>
+                  ₹ {total >= 0 ? total.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0.00'}
+                </Typography>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        <TextField
-          label="Footer Note"
-          value={bill.footer}
-          onChange={handleFooterChange}
-          fullWidth
-          multiline
-          minRows={2}
-        />
-      </Paper>
+          <TextField
+            label="Footer Note"
+            value={bill.footer}
+            onChange={handleFooterChange}
+            fullWidth
+            multiline
+            minRows={2}
+          />
+        </Paper>
+      </Stack>
     </Box>
   );
 };

@@ -48,6 +48,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
+import ProductCategory from './ProductCategory';
 
 const drawerWidth = 220;
 
@@ -100,6 +101,7 @@ const Dashboard = () => {
   const [dateTo, setDateTo] = useState(null);
   const isMobile = useMediaQuery('(max-width:900px)');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [masterSubView, setMasterSubView] = useState(0);
 
   // Dummy previous bills for demo
   const previousBills = [
@@ -277,9 +279,17 @@ const Dashboard = () => {
           return <Bill />;
       }
     }
+    if (selectedTab === 1) {
+      switch (masterSubView) {
+        case 0:
+          return <ProductCategory />;
+        case 1:
+          return <Stock />;
+        default:
+          return <ProductCategory />;
+      }
+    }
     switch (selectedTab) {
-      case 1:
-        return <Stock />;
       case 2:
         return <Employee />;
       case 3:
@@ -300,6 +310,8 @@ const Dashboard = () => {
         setSelectedTab={setSelectedTab}
         billSubView={billSubView}
         setBillSubView={setBillSubView}
+        masterSubView={masterSubView}
+        setMasterSubView={setMasterSubView}
         billDrawerView={billDrawerView}
         setBillDrawerView={setBillDrawerView}
         billDrawerOpen={billDrawerOpen}
