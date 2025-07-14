@@ -28,6 +28,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import { useAuth } from '../../context/AuthContext';
+import { db } from '../../firebase';
+import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 
 const initialService = { description: '', rate: '', quantity: '' };
 
@@ -64,6 +67,9 @@ const Bill = () => {
     // Try to load from localStorage or default to 'modern'
     return localStorage.getItem('billTemplate') || 'modern';
   });
+  const { currentUser } = useAuth();
+  const tenantId = currentUser?.uid;
+  const [records, setRecords] = useState([]);
 
   // Use onboarding business info for invoice header
   const businessInfo = data.onboarding.businessInfo || {};
@@ -92,6 +98,14 @@ const Bill = () => {
   useEffect(() => {
     localStorage.setItem('billTemplate', selectedTemplate);
   }, [selectedTemplate]);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    const unsub = onSnapshot(collection(db, 'tenants', tenantId, 'bills'), (snapshot) => {
+      setRecords(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, [tenantId]);
 
   // Handlers
   const handleClientChange = (e) => {
@@ -312,6 +326,12 @@ const Bill = () => {
     win.document.close();
     win.focus();
     setTimeout(() => win.print(), 500);
+  };
+
+  // Save Invoice handler
+  const handleSaveInvoice = async () => {
+    if (!tenantId) return;
+    await addDoc(collection(db, 'tenants', tenantId, 'bills'), bill);
   };
 
   return (
@@ -622,8 +642,16 @@ const Bill = () => {
             minRows={2}
           />
         </Paper>
+        
       </Stack>
+      {/* Save Button at the bottom */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+        <Button variant="contained" color="primary" onClick={handleSaveInvoice}>
+          Save Invoice
+        </Button>
+      </Box>
     </Box>
+    
   );
 };
 

@@ -22,6 +22,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const drawerWidth = 220;
 const PALETTE = {
@@ -33,6 +34,7 @@ const PALETTE = {
 const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 const tabs = [
+  { label: 'Dashboard', icon: <DashboardIcon sx={{ fontSize: 30 }} /> },
   { label: 'Bill', icon: <ReceiptLongIcon sx={{ fontSize: 30 }} /> },
   { label: 'Master', icon: <SettingsIcon sx={{ fontSize: 30 }} /> },
   { label: 'Employee', icon: <PeopleIcon sx={{ fontSize: 30 }} /> },

@@ -29,6 +29,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useBusiness } from '../../context/BusinessContext';
 import { db } from '../../firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../../context/AuthContext';
 
 const initialProduct = { name: '', quantity: '', price: '', category: '' };
 
@@ -51,15 +52,18 @@ const Stock = () => {
   const [form, setForm] = useState(initialProduct);
   const [categories, setCategories] = useState([]);
   const [catLoading, setCatLoading] = useState(true);
+  const { currentUser } = useAuth();
+  const tenantId = currentUser?.uid;
 
   useEffect(() => {
-    // Real-time listener for categories
-    const unsub = onSnapshot(collection(db, 'categories'), (snapshot) => {
+    if (!tenantId) return;
+    // Real-time listener for categories under the tenant
+    const unsub = onSnapshot(collection(db, 'tenants', tenantId, 'categories'), (snapshot) => {
       setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setCatLoading(false);
     });
     return () => unsub();
-  }, []);
+  }, [tenantId]);
 
   useEffect(() => {
     setProducts(data.stock);
