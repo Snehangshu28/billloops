@@ -54,6 +54,10 @@ export default function Signup({ hideReview }) {
     email: '',
     phone: '',
     password: '',
+    businessName: '',
+    businessAddress: '',
+    businessEmail: '',
+    businessPhone: '',
   });
   const navigate = useNavigate();
   const { signup } = useAuth();
@@ -70,12 +74,29 @@ export default function Signup({ hideReview }) {
     setError('');
     setSuccess('');
     setLoading(true);
+    
+    console.log('Form data being submitted:', {
+      company: form.company,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+      businessName: form.businessName,
+      businessAddress: form.businessAddress,
+      businessEmail: form.businessEmail,
+      businessPhone: form.businessPhone,
+      country,
+    });
+    
     try {
       await signup({
         company: form.company,
         email: form.email,
         phone: form.phone,
         password: form.password,
+        businessName: form.businessName,
+        businessAddress: form.businessAddress,
+        businessEmail: form.businessEmail,
+        businessPhone: form.businessPhone,
         country,
       });
       setSuccess('Account created! Redirecting to login...');
@@ -83,6 +104,7 @@ export default function Signup({ hideReview }) {
         navigate('/login');
       }, 1200);
     } catch (err) {
+      console.error('Signup error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -197,9 +219,61 @@ export default function Signup({ hideReview }) {
               }}
             />
             <TextField
-              label="Email address"
-              name="email"
-              value={form.email}
+              label="Business Name"
+              name="businessName"
+              value={form.businessName}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              required
+              variant="outlined"
+              InputLabelProps={{
+                style: { color: PALETTE.forest, fontSize: 16, ...FONT },
+              }}
+              inputProps={{ style: { ...FONT, fontSize: 16 } }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  fontFamily: 'Poppins',
+                  borderRadius: 2,
+                  '& fieldset': { borderColor: PALETTE.moss },
+                  '&:hover fieldset': { borderColor: PALETTE.forest },
+                  '&.Mui-focused fieldset': { borderColor: PALETTE.moss },
+                  transition: 'all 0.3s',
+                },
+                mb: 1,
+              }}
+            />
+            <TextField
+              label="Business Address"
+              name="businessAddress"
+              value={form.businessAddress}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              required
+              variant="outlined"
+              multiline
+              rows={2}
+              InputLabelProps={{
+                style: { color: PALETTE.forest, fontSize: 16, ...FONT },
+              }}
+              inputProps={{ style: { ...FONT, fontSize: 16 } }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  fontFamily: 'Poppins',
+                  borderRadius: 2,
+                  '& fieldset': { borderColor: PALETTE.moss },
+                  '&:hover fieldset': { borderColor: PALETTE.forest },
+                  '&.Mui-focused fieldset': { borderColor: PALETTE.moss },
+                  transition: 'all 0.3s',
+                },
+                mb: 1,
+              }}
+            />
+            <TextField
+              label="Business Email"
+              name="businessEmail"
+              value={form.businessEmail}
               onChange={handleChange}
               type="email"
               fullWidth
@@ -223,9 +297,9 @@ export default function Signup({ hideReview }) {
               }}
             />
             <TextField
-              label="Phone number"
-              name="phone"
-              value={form.phone}
+              label="Business Phone"
+              name="businessPhone"
+              value={form.businessPhone}
               onChange={handleChange}
               type="tel"
               fullWidth

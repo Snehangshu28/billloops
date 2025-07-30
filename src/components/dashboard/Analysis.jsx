@@ -77,10 +77,10 @@ function SummaryCards() {
       <Grid item xs={12} sm={6} md={3}>
         <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'background.paper' }}>
           <MonetizationOnIcon color="primary" sx={{ fontSize: 32 }} />
-          <Box>
+          {/* <Box>
             <Typography variant="subtitle2">Today's Sales</Typography>
             <Typography variant="h6">₹{summary.todaySales.toLocaleString()}</Typography>
-          </Box>
+          </Box> */}
         </Paper>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>

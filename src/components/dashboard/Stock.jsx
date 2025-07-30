@@ -28,7 +28,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useBusiness } from '../../context/BusinessContext';
 import { db } from '../../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 
 const initialProduct = { name: '', quantity: '', price: '', category: '' };
@@ -45,8 +45,10 @@ const COLORS = {
 const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 const Stock = () => {
-  const { data, updateStock } = useBusiness();
-  const [products, setProducts] = useState(data.stock);
+  // Remove updateStock from useBusiness
+  // const { data, updateStock } = useBusiness();
+  const { data } = useBusiness();
+  const [products, setProducts] = useState([]); // Start with empty array
   const [open, setOpen] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
   const [form, setForm] = useState(initialProduct);
@@ -65,9 +67,20 @@ const Stock = () => {
     return () => unsub();
   }, [tenantId]);
 
+  // Real-time listener for stocks under the tenant
   useEffect(() => {
-    setProducts(data.stock);
-  }, [data.stock]);
+    if (!tenantId) return;
+    const stockRef = collection(db, 'tenants', tenantId, 'stocks');
+    const unsub = onSnapshot(stockRef, (snapshot) => {
+      setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsub();
+  }, [tenantId]);
+
+  // Remove useEffect that sets products from data.stock
+  // useEffect(() => {
+  //   setProducts(data.stock);
+  // }, [data.stock]);
 
   const handleOpen = (idx = null) => {
     setEditIdx(idx);
@@ -82,21 +95,25 @@ const Stock = () => {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleSave = () => {
-    let updated;
+  const handleSave = async () => {
+    if (!tenantId) return;
+    const stockRef = collection(db, 'tenants', tenantId, 'stocks');
     if (editIdx !== null) {
-      updated = products.map((p, i) => (i === editIdx ? form : p));
+      // Update existing product
+      const product = products[editIdx];
+      const productRef = doc(db, 'tenants', tenantId, 'stocks', product.id);
+      await updateDoc(productRef, form);
     } else {
-      updated = [...products, form];
+      // Add new product
+      await addDoc(stockRef, form);
     }
-    setProducts(updated);
-    updateStock(updated);
     handleClose();
   };
-  const handleDelete = (idx) => {
-    const updated = products.filter((_, i) => i !== idx);
-    setProducts(updated);
-    updateStock(updated);
+  const handleDelete = async (idx) => {
+    if (!tenantId) return;
+    const product = products[idx];
+    const productRef = doc(db, 'tenants', tenantId, 'stocks', product.id);
+    await deleteDoc(productRef);
   };
 
   return (

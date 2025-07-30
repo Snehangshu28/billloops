@@ -7,7 +7,15 @@ import {
 } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import Onboarding from './components/onboarding/Onboarding';
+import DashboardLayout from './components/dashboard/DashboardLayout';
 import Dashboard from './components/dashboard/Dashboard';
+import Bill from './components/dashboard/Bill';
+import ShowRecords from './components/dashboard/ShowRecords';
+import ProductCategory from './components/dashboard/ProductCategory';
+import Stock from './components/dashboard/Stock';
+import Employee from './components/dashboard/Employee';
+import Customer from './components/dashboard/Customer';
+import Analysis from './components/dashboard/Analysis';
 import { BusinessProvider } from './context/BusinessContext';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
@@ -123,7 +131,21 @@ function App() {
               </Routes>
               <Routes>
                 <Route path="/" element={<PrivateRoute />}>
-                  <Route path="/" element={<Dashboard />} />
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/bill" element={<Navigate to="/bill/create" replace />} />
+                    <Route path="/bill/create" element={<Bill />} />
+                    <Route path="/bill/edit/:billId" element={<Bill />} />
+                    <Route path="/bill/records" element={<ShowRecords />} />
+                    <Route path="/bill/settings" element={<div><h2>Bill Settings</h2></div>} />
+                    <Route path="/master" element={<Navigate to="/master/product-category" replace />} />
+                    <Route path="/master/product-category" element={<ProductCategory />} />
+                    <Route path="/master/stock" element={<Stock />} />
+                    <Route path="/employee" element={<Employee />} />
+                    <Route path="/customer" element={<Customer />} />
+                    <Route path="/offer" element={<div><h2>Offer Management</h2></div>} />
+                  </Route>
                 </Route>
               </Routes>
             </AuthProvider>

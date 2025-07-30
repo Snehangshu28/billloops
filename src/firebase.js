@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: 'AIzaSyD8euVhDxo3K9K03UlYa3tULjcJbsK7weI',
   authDomain: 'snehangshu-b876d.firebaseapp.com',
   projectId: 'snehangshu-b876d',
-  storageBucket: 'snehangshu-b876d.firebasestorage.app',
+  storageBucket: 'snehangshu-b876d.appspot.com',
   messagingSenderId: '488542203824',
   appId: '1:488542203824:web:68ff89f35cdd666220f075',
   measurementId: 'G-22KXK0XW2X',

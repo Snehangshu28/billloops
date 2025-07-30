@@ -26,6 +26,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useBusiness } from '../../context/BusinessContext';
+import { useAuth } from '../../context/AuthContext';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { collection, addDoc, getDocs, doc as firestoreDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
@@ -63,9 +67,14 @@ const getEmployeeStatus = (employeeId) => {
   };
 };
 
-const Employee = () => {
-  const { data, updateEmployees } = useBusiness();
-  const [employees, setEmployees] = useState(data.employees || []);
+const Employee = ({ employeeSubView, setEmployeeSubView }) => {
+  const { data } = useBusiness();
+  console.log(data);
+  const { currentUser } = useAuth();
+  const tenantId = currentUser?.uid || 'default';
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
   const [form, setForm] = useState(initialEmployee);
@@ -79,8 +88,16 @@ const Employee = () => {
   const [dateRange, setDateRange] = useState({ start: startOfMonth(new Date()), end: endOfMonth(new Date()) });
 
   useEffect(() => {
-    setEmployees(data.employees || []);
-  }, [data.employees]);
+    fetchEmployees();
+    // eslint-disable-next-line
+  }, [tenantId]);
+
+  const fetchEmployees = async () => {
+    if (!tenantId) return;
+    const q = collection(db, 'tenants', tenantId, 'employees');
+    const snapshot = await getDocs(q);
+    setEmployees(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
 
   useEffect(() => {
     // Update dateRange based on rangeType
@@ -120,20 +137,25 @@ const Employee = () => {
     setBiometricFile(e.target.files[0]);
     setForm({ ...form, biometric: e.target.files[0]?.name || '' });
   };
-  const handleSave = () => {
-    let updated;
-    let newForm = { ...form };
-    if (biometricFile) {
-      newForm.biometric = biometricFile.name; // Simulate file upload
+  const handleSave = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await addDoc(collection(db, 'tenants', tenantId, 'employees'), {
+        name: form.name,
+        contact: form.contact,
+        employeeId: form.employeeId,
+        joiningDate: form.joiningDate,
+        address: form.address,
+        createdBy: currentUser?.uid || '',
+        createdAt: new Date(),
+      });
+      fetchEmployees();
+      handleClose();
+    } catch (err) {
+      setError('Failed to add employee.');
     }
-    if (editIdx !== null) {
-      updated = employees.map((e, i) => (i === editIdx ? newForm : e));
-    } else {
-      updated = [...employees, newForm];
-    }
-    setEmployees(updated);
-    updateEmployees(updated);
-    handleClose();
+    setLoading(false);
   };
   const handleDelete = (idx) => {
     const updated = employees.filter((_, i) => i !== idx);
@@ -147,6 +169,22 @@ const Employee = () => {
       const d = new Date(rec.date);
       return d >= dateRange.start && d <= dateRange.end;
     });
+  };
+
+  // Add file fields to form state
+  const handleDialogFileChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.files[0] });
+  };
+
+  // Delete employee
+  const handleDeleteFirestore = async (empId) => {
+    if (!window.confirm('Delete this employee?')) return;
+    try {
+      await deleteDoc(firestoreDoc(db, 'tenants', tenantId, 'employees', empId));
+      fetchEmployees();
+    } catch (err) {
+      setError('Failed to delete employee.');
+    }
   };
 
   return (
@@ -232,23 +270,6 @@ const Employee = () => {
                   InputLabelProps={{ shrink: true }}
                   required
                 />
-                <Box>
-                  <Typography variant="body2" mb={1}>Biometric (File Upload or Unique ID)</Typography>
-                  <input
-                    type="file"
-                    accept="*"
-                    onChange={handleFileChange}
-                    style={{ marginBottom: 8 }}
-                  />
-                  <TextField
-                    label="Or Enter Biometric ID"
-                    name="biometric"
-                    value={form.biometric}
-                    onChange={handleChange}
-                    fullWidth
-                    variant="filled"
-                  />
-                </Box>
                 <TextField
                   label="Address"
                   name="address"
@@ -270,11 +291,12 @@ const Employee = () => {
                 size="large"
                 sx={{ borderRadius: 2, fontWeight: 600 }}
                 disabled={
-                  !form.name || !form.contact || !form.employeeId || !form.joiningDate || !form.biometric || !form.address
+                  !form.name || !form.contact || !form.employeeId || !form.joiningDate || !form.address || loading
                 }
               >
-                Save
+                {loading ? 'Saving...' : 'Save'}
               </Button>
+              {error && <Typography color="error" mt={1}>{error}</Typography>}
             </DialogActions>
           </Dialog>
         </Paper>
@@ -292,7 +314,6 @@ const Employee = () => {
                   <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Contact</TableCell>
                   <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Employee ID</TableCell>
                   <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Joining Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Biometric</TableCell>
                   <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Address</TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700, fontSize: 16 }}>Actions</TableCell>
                 </TableRow>
@@ -300,14 +321,14 @@ const Employee = () => {
               <TableBody>
                 {employees.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center">
+                    <TableCell colSpan={6} align="center">
                       No employees added yet.
                     </TableCell>
                   </TableRow>
                 ) : (
                   employees.map((emp, idx) => (
                     <TableRow
-                      key={idx}
+                      key={emp.id}
                       sx={{
                         bgcolor: idx % 2 === 0 ? '#f7f9fc' : '#fff',
                         '&:hover': { bgcolor: '#e3e9f7' },
@@ -318,16 +339,11 @@ const Employee = () => {
                       <TableCell>{emp.contact}</TableCell>
                       <TableCell>{emp.employeeId}</TableCell>
                       <TableCell>{emp.joiningDate}</TableCell>
-                      <TableCell>{emp.biometric}</TableCell>
                       <TableCell>{emp.address}</TableCell>
                       <TableCell align="center">
-                        <Tooltip title="Edit">
-                          <IconButton color="primary" onClick={() => handleOpen(idx)}>
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
+                        {/* You can add Edit/View logic here if needed */}
                         <Tooltip title="Delete">
-                          <IconButton color="error" onClick={() => handleDelete(idx)}>
+                          <IconButton color="error" onClick={() => handleDeleteFirestore(emp.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </Tooltip>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Drawer,
@@ -34,59 +35,53 @@ const PALETTE = {
 const FONT = { fontFamily: 'Poppins, sans-serif' };
 
 const tabs = [
-  { label: 'Dashboard', icon: <DashboardIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Bill', icon: <ReceiptLongIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Master', icon: <SettingsIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Employee', icon: <PeopleIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Analysis', icon: <BarChartIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Customer', icon: <GroupIcon sx={{ fontSize: 30 }} /> },
-  { label: 'Offer', icon: <LocalOfferIcon sx={{ fontSize: 30 }} /> }
+  { label: 'Dashboard', icon: <DashboardIcon sx={{ fontSize: 30 }} />, path: '/dashboard' },
+  { label: 'Bill', icon: <ReceiptLongIcon sx={{ fontSize: 30 }} />, path: '/bill' },
+  { label: 'Master', icon: <SettingsIcon sx={{ fontSize: 30 }} />, path: '/master' },
+  { label: 'Employee', icon: <PeopleIcon sx={{ fontSize: 30 }} />, path: '/employee' },
+  { label: 'Customer', icon: <GroupIcon sx={{ fontSize: 30 }} />, path: '/customer' },
+  { label: 'Offer', icon: <LocalOfferIcon sx={{ fontSize: 30 }} />, path: '/offer' }
 ];
 
 const Sidebar = ({
-  selectedTab,
-  setSelectedTab,
-  billSubView,
-  setBillSubView,
   isMobile,
   mobileOpen,
   setMobileOpen,
   handleDrawerToggle,
-  masterSubView,
-  setMasterSubView,
 }) => {
   const [billMenuOpen, setBillMenuOpen] = useState(false);
   const [masterMenuOpen, setMasterMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleTabClick = (idx) => {
-    if (tabs[idx].label === 'Bill') {
+  const handleTabClick = (tab) => {
+    if (tab.label === 'Bill') {
       setBillMenuOpen((open) => !open);
-    } else if (tabs[idx].label === 'Master') {
+    } else if (tab.label === 'Master') {
       setMasterMenuOpen((open) => !open);
-    } else if (tabs[idx].label === 'Stock') {
-      setSelectedTab(idx);
-      if (setMasterSubView) setMasterSubView(1); // Stock subview
-      if (isMobile) setMobileOpen(false);
     } else {
-      setSelectedTab(idx);
+      navigate(tab.path);
       if (isMobile) setMobileOpen(false);
     }
   };
 
-  const handleBillSubmenuClick = (submenuIdx) => {
-    setSelectedTab(0); // Always Bill tab
-    if (setBillSubView) {
-      if (submenuIdx === 0) setBillSubView('create');
-      if (submenuIdx === 1) setBillSubView('records');
-      if (submenuIdx === 2) setBillSubView('settings');
-    }
+  const handleBillSubmenuClick = (submenuPath) => {
+    navigate(submenuPath);
     if (isMobile) setMobileOpen(false);
   };
 
-  const handleMasterSubmenuClick = (submenuIdx) => {
-    setSelectedTab(1); // Always Master tab
-    if (setMasterSubView) setMasterSubView(submenuIdx);
+  const handleMasterSubmenuClick = (submenuPath) => {
+    navigate(submenuPath);
     if (isMobile) setMobileOpen(false);
+  };
+
+  const isActiveTab = (tab) => {
+    if (tab.label === 'Bill') {
+      return location.pathname.startsWith('/bill');
+    } else if (tab.label === 'Master') {
+      return location.pathname.startsWith('/master');
+    }
+    return location.pathname === tab.path;
   };
 
   const sidebarContent = (
@@ -103,17 +98,17 @@ const Sidebar = ({
       <Toolbar sx={{ minHeight: 72 }} />
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
       <List sx={{ mt: 2 }}>
-        {tabs.map((tab, idx) => (
+        {tabs.map((tab) => (
           <React.Fragment key={tab.label}>
             <ListItem disablePadding sx={{ mb: 1 }}>
               <ListItemButton
-                selected={selectedTab === idx}
-                onClick={() => handleTabClick(idx)}
+                selected={isActiveTab(tab)}
+                onClick={() => handleTabClick(tab)}
                 sx={{
                   borderRadius: 2,
                   mx: 1,
                   background:
-                    selectedTab === idx ? PALETTE.moss : 'transparent',
+                    isActiveTab(tab) ? PALETTE.moss : 'transparent',
                   '&:hover': {
                     background: PALETTE.olive,
                     color: '#fff',
@@ -130,7 +125,7 @@ const Sidebar = ({
                 <ListItemText
                   primary={tab.label}
                   primaryTypographyProps={{
-                    fontWeight: selectedTab === idx ? 700 : 500,
+                    fontWeight: isActiveTab(tab) ? 700 : 500,
                     fontSize: 18,
                     ...FONT,
                   }}
@@ -151,8 +146,13 @@ const Sidebar = ({
               <Collapse in={billMenuOpen} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding sx={{ pl: 4 }}>
                   <ListItemButton
-                    onClick={() => handleBillSubmenuClick(0)}
-                    sx={{ borderRadius: 2, mb: 1, ...FONT }}
+                    onClick={() => handleBillSubmenuClick('/bill/create')}
+                    sx={{ 
+                      borderRadius: 2, 
+                      mb: 1, 
+                      ...FONT,
+                      background: location.pathname === '/bill/create' ? PALETTE.moss : 'transparent',
+                    }}
                   >
                     <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
                       <ReceiptLongIcon />
@@ -163,8 +163,13 @@ const Sidebar = ({
                     />
                   </ListItemButton>
                   <ListItemButton
-                    onClick={() => handleBillSubmenuClick(1)}
-                    sx={{ borderRadius: 2, mb: 1, ...FONT }}
+                    onClick={() => handleBillSubmenuClick('/bill/records')}
+                    sx={{ 
+                      borderRadius: 2, 
+                      mb: 1, 
+                      ...FONT,
+                      background: location.pathname === '/bill/records' ? PALETTE.moss : 'transparent',
+                    }}
                   >
                     <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
                       <HistoryIcon />
@@ -175,8 +180,12 @@ const Sidebar = ({
                     />
                   </ListItemButton>
                   <ListItemButton
-                    onClick={() => handleBillSubmenuClick(2)}
-                    sx={{ borderRadius: 2, ...FONT }}
+                    onClick={() => handleBillSubmenuClick('/bill/settings')}
+                    sx={{ 
+                      borderRadius: 2, 
+                      ...FONT,
+                      background: location.pathname === '/bill/settings' ? PALETTE.moss : 'transparent',
+                    }}
                   >
                     <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
                       <SettingsIcon />
@@ -193,8 +202,13 @@ const Sidebar = ({
               <Collapse in={masterMenuOpen} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding sx={{ pl: 4 }}>
                   <ListItemButton
-                    onClick={() => handleMasterSubmenuClick(0)}
-                    sx={{ borderRadius: 2, mb: 1, ...FONT }}
+                    onClick={() => handleMasterSubmenuClick('/master/product-category')}
+                    sx={{ 
+                      borderRadius: 2, 
+                      mb: 1, 
+                      ...FONT,
+                      background: location.pathname === '/master/product-category' ? PALETTE.moss : 'transparent',
+                    }}
                   >
                     <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
                       <Inventory2Icon />
@@ -205,8 +219,12 @@ const Sidebar = ({
                     />
                   </ListItemButton>
                   <ListItemButton
-                    onClick={() => handleMasterSubmenuClick(1)}
-                    sx={{ borderRadius: 2, ...FONT }}
+                    onClick={() => handleMasterSubmenuClick('/master/stock')}
+                    sx={{ 
+                      borderRadius: 2, 
+                      ...FONT,
+                      background: location.pathname === '/master/stock' ? PALETTE.moss : 'transparent',
+                    }}
                   >
                     <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
                       <Inventory2Icon />

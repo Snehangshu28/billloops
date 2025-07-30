@@ -1,20 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, Typography, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Stack } from '@mui/material';
+import {
+  Paper,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  IconButton,
+  TextField,
+  Box,
+  Grid,
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
-import { collection, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const ShowRecords = () => {
   const { currentUser } = useAuth();
   const tenantId = currentUser?.uid;
   const [records, setRecords] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('view'); // 'view' or 'edit'
-  const [selectedBill, setSelectedBill] = useState(null);
-  const [editBill, setEditBill] = useState(null);
+  const [searchName, setSearchName] = useState('');
+  const [searchInvoice, setSearchInvoice] = useState('');
+  const [searchDate, setSearchDate] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!tenantId) return;
@@ -31,38 +45,67 @@ const ShowRecords = () => {
   };
 
   const handleView = (bill) => {
-    setSelectedBill(bill);
-    setModalMode('view');
-    setModalOpen(true);
+    alert(`Invoice #: ${bill.client?.invoice || 'N/A'}\nClient: ${bill.client?.name || 'N/A'}\nDate: ${bill.client?.date || 'N/A'}\nTotal: ₹${bill.total || 0}`);
   };
 
   const handleEdit = (bill) => {
-    setEditBill({ ...bill });
-    setModalMode('edit');
-    setModalOpen(true);
+    navigate(`/bill/edit/${bill.id}`, {
+      state: {
+        billData: bill,
+        isEditing: true,
+      },
+    });
   };
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditBill((prev) => ({ ...prev, client: { ...prev.client, [name]: value } }));
-  };
-
-  const handleEditSave = async () => {
-    if (!tenantId || !editBill) return;
-    await updateDoc(doc(db, 'tenants', tenantId, 'bills', editBill.id), editBill);
-    setModalOpen(false);
-    setEditBill(null);
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-    setSelectedBill(null);
-    setEditBill(null);
-  };
+  // Filter records based on all three fields
+  const filteredRecords = records.filter((rec) => {
+    const nameMatch = rec.client?.name?.toLowerCase().includes(searchName.toLowerCase());
+    const invoiceMatch = rec.client?.invoice?.toLowerCase().includes(searchInvoice.toLowerCase());
+    const dateMatch = rec.client?.date?.toLowerCase().includes(searchDate.toLowerCase());
+    return nameMatch && invoiceMatch && dateMatch;
+  });
 
   return (
     <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
-      <Typography variant="h6" fontWeight={700} gutterBottom>Show Records</Typography>
+      <Typography variant="h6" fontWeight={700} gutterBottom>
+        Show Records
+      </Typography>
+
+      <Box mb={2}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Search by Client Name"
+              variant="outlined"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Search by Invoice #"
+              variant="outlined"
+              value={searchInvoice}
+              onChange={(e) => setSearchInvoice(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Search by Date"
+              variant="outlined"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+
       <TableContainer>
         <Table size="small">
           <TableHead>
@@ -75,29 +118,39 @@ const ShowRecords = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {records.length === 0 ? (
+            {filteredRecords.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center">No records found.</TableCell>
               </TableRow>
             ) : (
-              records.map((rec) => {
-                // Calculate total for each record
-                const subtotal = (rec.services || []).reduce((sum, row) => {
-                  const rate = parseFloat(row.rate) || 0;
-                  const qty = parseFloat(row.quantity) || 0;
-                  return sum + rate * qty;
-                }, 0);
-                const discountPercent = parseFloat(rec.discount) || 0;
-                const discountAmount = subtotal * (discountPercent / 100);
-                const cgstAmount = subtotal * (parseFloat(rec.cgst) || 0) / 100;
-                const sgstAmount = subtotal * (parseFloat(rec.sgst) || 0) / 100;
-                const total = subtotal - discountAmount + cgstAmount + sgstAmount;
+              filteredRecords.map((rec) => {
+                let total = rec.total;
+                let subtotal = rec.subtotal;
+                let discountAmount = rec.discountAmount;
+                let cgstAmount = rec.cgstAmount;
+                let sgstAmount = rec.sgstAmount;
+
+                if (typeof total === 'undefined') {
+                  subtotal = (rec.services || []).reduce((sum, row) => {
+                    const rate = parseFloat(row.rate) || 0;
+                    const qty = parseFloat(row.quantity) || 0;
+                    return sum + rate * qty;
+                  }, 0);
+                  const discountPercent = parseFloat(rec.discount) || 0;
+                  discountAmount = subtotal * (discountPercent / 100);
+                  cgstAmount = subtotal * (parseFloat(rec.cgst) || 0) / 100;
+                  sgstAmount = subtotal * (parseFloat(rec.sgst) || 0) / 100;
+                  total = subtotal - discountAmount + cgstAmount + sgstAmount;
+                }
+
                 return (
                   <TableRow key={rec.id}>
                     <TableCell>{rec.client?.invoice || ''}</TableCell>
                     <TableCell>{rec.client?.name || ''}</TableCell>
                     <TableCell>{rec.client?.date || ''}</TableCell>
-                    <TableCell>₹ {total >= 0 ? total.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0.00'}</TableCell>
+                    <TableCell>
+                      ₹ {total >= 0 ? total.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0.00'}
+                    </TableCell>
                     <TableCell align="center">
                       <IconButton color="primary" onClick={() => handleView(rec)}><VisibilityIcon /></IconButton>
                       <IconButton color="secondary" onClick={() => handleEdit(rec)}><EditIcon /></IconButton>
@@ -110,34 +163,8 @@ const ShowRecords = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {/* Modal for View/Edit */}
-      <Dialog open={modalOpen} onClose={handleModalClose} maxWidth="sm" fullWidth>
-        <DialogTitle>{modalMode === 'view' ? 'View Bill' : 'Edit Bill'}</DialogTitle>
-        <DialogContent>
-          {modalMode === 'view' && selectedBill && (
-            <Stack spacing={2} mt={1}>
-              <TextField label="Invoice #" value={selectedBill.client?.invoice || ''} fullWidth InputProps={{ readOnly: true }} />
-              <TextField label="Client Name" value={selectedBill.client?.name || ''} fullWidth InputProps={{ readOnly: true }} />
-              <TextField label="Date" value={selectedBill.client?.date || ''} fullWidth InputProps={{ readOnly: true }} />
-              <TextField label="Total (INR)" value={`₹ ${(selectedBill.services||[]).reduce((sum, row) => sum + ((parseFloat(row.rate)||0)*(parseFloat(row.quantity)||0)), 0) - ((parseFloat(selectedBill.discount)||0)/100)*((selectedBill.services||[]).reduce((sum, row) => sum + ((parseFloat(row.rate)||0)*(parseFloat(row.quantity)||0)), 0)) + ((parseFloat(selectedBill.cgst)||0)/100)*((selectedBill.services||[]).reduce((sum, row) => sum + ((parseFloat(row.rate)||0)*(parseFloat(row.quantity)||0)), 0)) + ((parseFloat(selectedBill.sgst)||0)/100)*((selectedBill.services||[]).reduce((sum, row) => sum + ((parseFloat(row.rate)||0)*(parseFloat(row.quantity)||0)), 0))}`}
-                fullWidth InputProps={{ readOnly: true }} />
-            </Stack>
-          )}
-          {modalMode === 'edit' && editBill && (
-            <Stack spacing={2} mt={1}>
-              <TextField label="Invoice #" name="invoice" value={editBill.client?.invoice || ''} onChange={handleEditChange} fullWidth />
-              <TextField label="Client Name" name="name" value={editBill.client?.name || ''} onChange={handleEditChange} fullWidth />
-              <TextField label="Date" name="date" value={editBill.client?.date || ''} onChange={handleEditChange} fullWidth />
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModalClose}>Close</Button>
-          {modalMode === 'edit' && <Button onClick={handleEditSave} variant="contained">Save</Button>}
-        </DialogActions>
-      </Dialog>
     </Paper>
   );
 };
 
-export default ShowRecords; 
+export default ShowRecords;
