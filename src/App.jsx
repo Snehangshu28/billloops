@@ -21,6 +21,7 @@ import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import Offer from './components/dashboard/Offer';
 
 const theme = createTheme({
   palette: {
@@ -144,7 +145,7 @@ function App() {
                     <Route path="/master/stock" element={<Stock />} />
                     <Route path="/employee" element={<Employee />} />
                     <Route path="/customer" element={<Customer />} />
-                    <Route path="/offer" element={<div><h2>Offer Management</h2></div>} />
+                    <Route path="/offer" element={<Offer />} />
                   </Route>
                 </Route>
               </Routes>

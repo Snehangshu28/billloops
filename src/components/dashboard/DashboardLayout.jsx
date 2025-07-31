@@ -22,31 +22,41 @@ const DashboardLayout = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#FFFBDE' }}>
       <CssBaseline />
-      <Navbar onProfileOpen={() => setProfileOpen(true)} handleDrawerToggle={handleDrawerToggle} isMobile={isMobile} />
+
+      {/* Navbar */}
+      <Navbar
+        onProfileOpen={() => setProfileOpen(true)}
+        handleDrawerToggle={handleDrawerToggle}
+        isMobile={isMobile}
+      />
+
+      {/* Sidebar */}
       <Sidebar
         isMobile={isMobile}
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
         handleDrawerToggle={handleDrawerToggle}
         sx={{
+          width: { md: drawerWidth },
+          flexShrink: { md: 0 },
           position: { md: 'fixed' },
-          top: { md: 0 },
-          left: { md: 0 },
           height: { md: '100vh' },
           zIndex: 1200,
         }}
       />
+
+      {/* Main content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: { xs: 1, md: 3 },
-          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
           mt: 8,
-          minHeight: '100vh',
           background: 'rgba(255,255,255,0.7)',
           borderRadius: 4,
           boxShadow: 3,
+          minHeight: '100vh',
         }}
       >
         <Paper elevation={0} sx={{ p: { xs: 1, md: 2 }, bgcolor: 'transparent', boxShadow: 'none' }}>
@@ -54,10 +64,12 @@ const DashboardLayout = () => {
             <Outlet />
           </Box>
         </Paper>
+
+        {/* Profile modal */}
         <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
       </Box>
     </Box>
   );
 };
 
-export default DashboardLayout; 
+export default DashboardLayout;

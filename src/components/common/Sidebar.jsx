@@ -263,15 +263,21 @@ const Sidebar = ({
   // Desktop: always visible static sidebar
   return (
     <Box
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        display: { xs: 'none', md: 'block' },
-      }}
-    >
-      {sidebarContent}
-    </Box>
-  );
+  sx={{
+    width: drawerWidth,
+    flexShrink: 0,
+    display: { xs: 'none', md: 'block' },
+    position: 'fixed',
+    height: '100vh',
+    top: 0,
+    left: 0,
+    zIndex: 1200,
+    overflowY: 'auto',
+  }}
+>
+  {sidebarContent}
+</Box>
+);
 };
 
 export default Sidebar;
