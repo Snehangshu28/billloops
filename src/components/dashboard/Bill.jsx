@@ -1160,6 +1160,7 @@ useEffect(() => {
                 <TableRow>
                   <TableCell>Description</TableCell>
                   <TableCell>Stock</TableCell>
+                  <TableCell>Recommend </TableCell>
                   <TableCell>Rate (₹)</TableCell>
                   <TableCell>Quantity</TableCell>
                   <TableCell>Subtotal (₹)</TableCell>
@@ -1199,6 +1200,26 @@ useEffect(() => {
                           {stockList.map((stock) => (
                             <MenuItem value={stock.name} key={stock.id}>
                               {stock.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      <FormControl fullWidth variant="standard">
+                        <Select
+                          value={row.staff || ""}
+                          onChange={(e) =>
+                            handleServiceChange(idx, "staff", e.target.value)
+                          }
+                          displayEmpty
+                        >
+                          <MenuItem value="">
+                            <em style={{ fontStyle: 'normal' }}>None</em>
+                          </MenuItem>
+                          {employeeList.map((emp) => (
+                            <MenuItem value={emp.name} key={emp.id}>
+                              {emp.name}
                             </MenuItem>
                           ))}
                         </Select>
