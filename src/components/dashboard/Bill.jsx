@@ -30,7 +30,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 // import { Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { useAuth } from "../../context/AuthContext";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { db } from "../../firebase";
 import {
   collection,
@@ -162,7 +162,7 @@ const Bill = () => {
 
   // Remove this useEffect to prevent bill state from being overwritten after reset
   useEffect(() => {
-    setBill(prev => ({
+    setBill((prev) => ({
       ...data.bill,
       products: data.bill.products || [initialProduct],
     }));
@@ -215,19 +215,24 @@ const Bill = () => {
     return () => unsub();
   }, [tenantId]);
 
-useEffect(() => {
-  if (isEditing && billData) {
-    setBill({
-      client: { ...billData.client },
-      services: billData.services?.length > 0 ? billData.services : [{ ...initialService }],
-      products: billData.products?.length > 0 ? billData.products : [{ ...initialProduct }],
-      discount: billData.discount || "",
-      footer: billData.footer || "",
-      business: billData.business || { bank: "", account: "" },
-    });
-  }
-}, [isEditing, billData]);
-
+  useEffect(() => {
+    if (isEditing && billData) {
+      setBill({
+        client: { ...billData.client },
+        services:
+          billData.services?.length > 0
+            ? billData.services
+            : [{ ...initialService }],
+        products:
+          billData.products?.length > 0
+            ? billData.products
+            : [{ ...initialProduct }],
+        discount: billData.discount || "",
+        footer: billData.footer || "",
+        business: billData.business || { bank: "", account: "" },
+      });
+    }
+  }, [isEditing, billData]);
 
   // Save template selection to localStorage
   useEffect(() => {
@@ -680,49 +685,54 @@ useEffect(() => {
 
   // Save Invoice handler
   const handleSaveInvoice = async () => {
-  try {
-    if (!tenantId) return;
+    try {
+      if (!tenantId) return;
 
-    const normalizedPhone = normalizePhone(phone);
-    const billToSave = {
-      ...bill,
-      client: {
-        ...bill.client,
-        name,
-        address,
-        contact: normalizedPhone,
-      },
-      total,
-      cgst,
-      sgst,
-      subtotal,
-      discountAmount,
-      cgstAmount,
-      sgstAmount,
-    };
+      const normalizedPhone = normalizePhone(phone);
+      const billToSave = {
+        ...bill,
+        client: {
+          ...bill.client,
+          name,
+          address,
+          contact: normalizedPhone,
+        },
+        total,
+        cgst,
+        sgst,
+        subtotal,
+        discountAmount,
+        cgstAmount,
+        sgstAmount,
+      };
 
-    await addDoc(collection(db, "tenants", tenantId, "bills"), billToSave);
+      await addDoc(collection(db, "tenants", tenantId, "bills"), billToSave);
 
-    for (const product of bill.products || []) {
-      if (product.stock && product.quantity) {
-        const stockItem = stockList.find((s) => s.name === product.stock);
-        if (stockItem?.id && !isNaN(Number(product.quantity))) {
-          const newQty = (parseFloat(stockItem.quantity) || 0) - (parseFloat(product.quantity) || 0);
-          const productRef = doc(db, "tenants", tenantId, "stocks", stockItem.id);
-          await updateDoc(productRef, { quantity: newQty });
+      for (const product of bill.products || []) {
+        if (product.stock && product.quantity) {
+          const stockItem = stockList.find((s) => s.name === product.stock);
+          if (stockItem?.id && !isNaN(Number(product.quantity))) {
+            const newQty =
+              (parseFloat(stockItem.quantity) || 0) -
+              (parseFloat(product.quantity) || 0);
+            const productRef = doc(
+              db,
+              "tenants",
+              tenantId,
+              "stocks",
+              stockItem.id
+            );
+            await updateDoc(productRef, { quantity: newQty });
+          }
         }
       }
+
+      // ✅ Show dialog after saving
+      setOpenPrintDialog(true);
+    } catch (error) {
+      console.error("Error saving invoice:", error);
     }
-
-    // ✅ Show dialog after saving
-    setOpenPrintDialog(true);
-
-  } catch (error) {
-    console.error("Error saving invoice:", error);
-  }
-};
-
-
+  };
 
   // Autofill name/address on phone change
   useEffect(() => {
@@ -918,12 +928,19 @@ useEffect(() => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={6}>
               <TextField
-                label="Customer Contact Number"
-                name="contact"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                fullWidth
-              />
+  label="Customer Contact Number"
+  name="contact"
+  value={phone}
+  onChange={(e) => {
+    const input = e.target.value;
+    // Allow only digits
+    if (/^\d*$/.test(input)) {
+      setPhone(input);
+    }
+  }}
+  type="tel"
+  fullWidth
+/>
               {showSuggestion && (suggestedName || suggestedAddress) && (
                 <Box
                   sx={{
@@ -988,57 +1005,57 @@ useEffect(() => {
               )}
             </Grid>
             <TextField
-  label="Client Name"
-  value={bill.client.name}
-  onChange={(e) =>
-    setBill((prev) => ({
-      ...prev,
-      client: { ...prev.client, name: e.target.value },
-    }))
-  }
-  fullWidth
-/>
-              <Grid item xs={12} sm={6} md={4}>
-    <TextField
-      label="Date"
-      name="date"
-      type="date"
-      value={bill.client.date}
-      onChange={(e) =>
-        setBill((prev) => ({
-          ...prev,
-          client: { ...prev.client, date: e.target.value },
-        }))
-      }
-      fullWidth
-      InputLabelProps={{ shrink: true }}
-    />
-  </Grid>
+              label="Client Name"
+              value={bill.client.name}
+              onChange={(e) =>
+                setBill((prev) => ({
+                  ...prev,
+                  client: { ...prev.client, name: e.target.value },
+                }))
+              }
+              fullWidth
+            />
             <Grid item xs={12} sm={6} md={4}>
-    <TextField
-      label="Invoice #"
-      name="invoice"
-      value={bill.client.invoice}
-      onChange={(e) =>
-        setBill((prev) => ({
-          ...prev,
-          client: { ...prev.client, invoice: e.target.value },
-        }))
-      }
-      fullWidth
-    />
-  </Grid>
+              <TextField
+                label="Date"
+                name="date"
+                type="date"
+                value={bill.client.date}
+                onChange={(e) =>
+                  setBill((prev) => ({
+                    ...prev,
+                    client: { ...prev.client, date: e.target.value },
+                  }))
+                }
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Invoice #"
+                name="invoice"
+                value={bill.client.invoice}
+                onChange={(e) =>
+                  setBill((prev) => ({
+                    ...prev,
+                    client: { ...prev.client, invoice: e.target.value },
+                  }))
+                }
+                fullWidth
+              />
+            </Grid>
             <TextField
-  label="Client Address"
-  value={bill.client.address}
-  onChange={(e) =>
-    setBill((prev) => ({
-      ...prev,
-      client: { ...prev.client, address: e.target.value },
-    }))
-  }
-  fullWidth
-/>
+              label="Client Address"
+              value={bill.client.address}
+              onChange={(e) =>
+                setBill((prev) => ({
+                  ...prev,
+                  client: { ...prev.client, address: e.target.value },
+                }))
+              }
+              fullWidth
+            />
           </Grid>
         </Paper>
         {/* Services Table Section */}
@@ -1086,7 +1103,7 @@ useEffect(() => {
                           displayEmpty
                         >
                           <MenuItem value="">
-                            <em style={{ fontStyle: 'normal' }}>None</em>
+                            <em style={{ fontStyle: "normal" }}>None</em>
                           </MenuItem>
                           {employeeList.map((emp) => (
                             <MenuItem value={emp.name} key={emp.id}>
@@ -1195,7 +1212,7 @@ useEffect(() => {
                           displayEmpty
                         >
                           <MenuItem value="">
-                            <em style={{ fontStyle: 'normal' }}>None</em>
+                            <em style={{ fontStyle: "normal" }}>None</em>
                           </MenuItem>
                           {stockList.map((stock) => (
                             <MenuItem value={stock.name} key={stock.id}>
@@ -1215,7 +1232,7 @@ useEffect(() => {
                           displayEmpty
                         >
                           <MenuItem value="">
-                            <em style={{ fontStyle: 'normal' }}>None</em>
+                            <em style={{ fontStyle: "normal" }}>None</em>
                           </MenuItem>
                           {employeeList.map((emp) => (
                             <MenuItem value={emp.name} key={emp.id}>
@@ -1324,8 +1341,6 @@ useEffect(() => {
                 })}`}
               />
             </Grid>
-            
-            
           </Grid>
           <Divider sx={{ my: 2 }} />
           <Grid container alignItems="center" sx={{ mb: 2 }}>
@@ -1374,41 +1389,57 @@ useEffect(() => {
               </Box>
             </Grid>
           </Grid>
-          <TextField
+          {/* <TextField
   label="Footer Note"
-  value={bill.footer || "Thank you for your business!"}
+  // value={bill.footer || "Thank you for your business!"}
   fullWidth
   multiline
   minRows={2}
   InputProps={{
     readOnly: true,
   }}
-/>
+/> */}
+          <TextField
+            label="Footer Note"
+            defaultValue="Thank you for your business!"
+            fullWidth
+            multiline
+            minRows={2}
+          />
         </Paper>
       </Stack>
       {/* Save Button at the bottom */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-  <Button variant="contained" color="primary" onClick={handleSaveInvoice}>
-    Save Invoice
-  </Button>
-</Box>
+        <Button variant="contained" color="primary" onClick={handleSaveInvoice}>
+          Save Invoice
+        </Button>
+      </Box>
 
-{/* Confirmation Dialog */}
-<Dialog open={openPrintDialog} onClose={() => setOpenPrintDialog(false)}>
-  <DialogTitle>Do you want to print the bill?</DialogTitle>
-  <DialogActions>
-    <Button onClick={() => {
-      setOpenPrintDialog(false);
-      window.print();
-    }} color="primary">Yes</Button>
+      {/* Confirmation Dialog */}
+      <Dialog open={openPrintDialog} onClose={() => setOpenPrintDialog(false)}>
+        <DialogTitle>Do you want to print the bill?</DialogTitle>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setOpenPrintDialog(false);
+              window.print();
+            }}
+            color="primary"
+          >
+            Yes
+          </Button>
 
-    <Button onClick={() => {
-      setOpenPrintDialog(false);
-      window.location.reload();
-    }} color="secondary">No</Button>
-  </DialogActions>
-</Dialog>
-
+          <Button
+            onClick={() => {
+              setOpenPrintDialog(false);
+              window.location.reload();
+            }}
+            color="secondary"
+          >
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
