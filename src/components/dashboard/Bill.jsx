@@ -918,7 +918,7 @@ useEffect(() => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={6}>
               <TextField
-                label="Customer Contact Number11"
+                label="Customer Contact Number"
                 name="contact"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
