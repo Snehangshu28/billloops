@@ -247,7 +247,15 @@ const Employee = ({ employeeSubView, setEmployeeSubView }) => {
                   fullWidth
                   variant="filled"
                   type="tel"
-                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 10, value: form.contact.replace(/\D/g, '').slice(0, 10)  }}
+                  error={form.contact !== "" && form.contact.length !== 10}
+                  helperText={
+                    form.contact === ""
+                      ? ""
+                      : form.contact.length !== 10
+                      ? "Contact number must be exactly 10 digits"
+                      : ""
+                  }
                   required
                 />
                 <TextField
