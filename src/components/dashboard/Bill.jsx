@@ -118,7 +118,9 @@ const initialClient = {
      client: { ...initialClient, date: today },
     services: [{ ...initialService }],
     products: [{ ...initialProduct }],
-    discount: "",
+    serviceDiscount: 0,
+    productDiscount: 0,
+    // discount: "",
     footer: "",
     business: { bank: "", account: "" },
   });
@@ -1184,7 +1186,7 @@ const initialClient = {
           <Grid container spacing={2} xs={6} sm={6} md={6}>
               <TextField
                 label=" Service Discount (%)"
-                value={bill.discount}
+                value={bill.serviceDiscount}
                 onChange={handleDiscountChange}
                 type="number"
                 fullWidth
@@ -1327,14 +1329,11 @@ const initialClient = {
             </Table>
           </TableContainer>
         </Paper>
-        {/* Billing Details Section */}
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-          </Typography>
-            <Grid item xs={12} sm={6} md={4}>
+          <Grid container spacing={2} xs={6} sm={6} md={6}>
               <TextField
-                label="Product Discount (%)"
-                value={bill.discount}
+                label=" Service Discount (%)"
+                value={bill.productDiscount}
                 onChange={handleDiscountChange}
                 type="number"
                 fullWidth
@@ -1344,6 +1343,15 @@ const initialClient = {
                   { maximumFractionDigits: 2 }
                 )}`}
               />
+            
+          </Grid>
+          <Divider sx={{ my: 2 }} />
+        </Paper>
+        {/* Billing Details Section */}
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+          </Typography>
+            <Grid item xs={12} sm={6} md={4}>
           <Grid container spacing={2} sx={{mt: 2}}>
             <Grid item xs={12} sm={6} md={2}>
               <TextField
