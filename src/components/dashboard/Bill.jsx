@@ -128,6 +128,8 @@ const initialClient = {
     // Try to load from localStorage or default to 'modern'
     return localStorage.getItem("billTemplate") || "modern";
   });
+  const [error, setError] = useState('');
+
   const { currentUser } = useAuth();
   const tenantId = currentUser?.uid;
   const [records, setRecords] = useState([]);
@@ -943,6 +945,14 @@ const initialClient = {
                   }
                 }}
                 type="tel"
+                error={phone !== "" && phone.length !== 10}
+                helperText={
+                  phone.contact === ""
+                    ? ""
+                    : phone.length !== 10
+                    ? "Contact number must be exactly 10 digits"
+                    : ""
+                }
                 fullWidth
               />
               {showSuggestion && (suggestedName || suggestedAddress) && (
