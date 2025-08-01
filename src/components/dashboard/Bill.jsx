@@ -824,9 +824,6 @@ const initialClient = {
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", my: 3 }}>
       <Stack direction="row" justifyContent="flex-end" mb={2} spacing={2}>
-        <Button variant="outlined" onClick={() => setTemplateModalOpen(true)}>
-          Choose Template
-        </Button>
         <Button
           variant="outlined"
           startIcon={<PrintIcon />}

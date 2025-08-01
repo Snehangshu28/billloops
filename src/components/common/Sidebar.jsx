@@ -187,13 +187,13 @@ const Sidebar = ({
                       background: location.pathname === '/bill/settings' ? PALETTE.moss : 'transparent',
                     }}
                   >
-                    <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
+                    {/* <ListItemIcon sx={{ color: '#fff', minWidth: 36 }}>
                       <SettingsIcon />
                     </ListItemIcon>
                     <ListItemText
                       primary="Bill Settings"
                       primaryTypographyProps={{ fontSize: 16, ...FONT }}
-                    />
+                    /> */}
                   </ListItemButton>
                 </List>
               </Collapse>
