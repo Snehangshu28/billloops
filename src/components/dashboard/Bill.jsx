@@ -1174,10 +1174,9 @@ const initialClient = {
           </TableContainer>
         </Paper>
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
+          <Grid container spacing={2} xs={6} sm={6} md={6}>
               <TextField
-                label="Discount (%)"
+                label=" Service Discount (%)"
                 value={bill.discount}
                 onChange={handleDiscountChange}
                 type="number"
@@ -1188,7 +1187,7 @@ const initialClient = {
                   { maximumFractionDigits: 2 }
                 )}`}
               />
-            </Grid> 
+            
           </Grid>
           <Divider sx={{ my: 2 }} />
         </Paper>
@@ -1324,12 +1323,10 @@ const initialClient = {
         {/* Billing Details Section */}
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
           <Typography variant="h6" fontWeight={700} gutterBottom>
-            Billing Details
           </Typography>
-          <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={4}>
               <TextField
-                label="Discount (%)"
+                label="Product Discount (%)"
                 value={bill.discount}
                 onChange={handleDiscountChange}
                 type="number"
@@ -1340,7 +1337,7 @@ const initialClient = {
                   { maximumFractionDigits: 2 }
                 )}`}
               />
-            </Grid>
+          <Grid container spacing={2} sx={{mt: 2}}>
             <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="CGST (%)"
@@ -1367,6 +1364,7 @@ const initialClient = {
                 })}`}
               />
             </Grid>
+          </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <Grid container alignItems="center" sx={{ mb: 2 }}>
