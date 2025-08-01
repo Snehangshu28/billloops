@@ -226,7 +226,7 @@ const Employee = ({ employeeSubView, setEmployeeSubView }) => {
               Add Employee
             </Button>
           </Stack>
-          <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 4, boxShadow: 6 } }}>
+          <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 2, boxShadow: 6 } }}>
             <DialogTitle sx={{ fontWeight: 700 }}>{editIdx !== null ? 'Edit Employee' : 'Add Employee'}</DialogTitle>
             <DialogContent>
               <Stack spacing={2}>

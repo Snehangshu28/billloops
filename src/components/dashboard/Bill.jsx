@@ -1332,7 +1332,7 @@ const initialClient = {
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
           <Grid container spacing={2} xs={6} sm={6} md={6}>
               <TextField
-                label=" Service Discount (%)"
+                label=" Product Discount (%)"
                 value={bill.productDiscount}
                 onChange={handleDiscountChange}
                 type="number"
