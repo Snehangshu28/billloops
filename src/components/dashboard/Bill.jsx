@@ -933,8 +933,8 @@ const Bill = () => {
   value={phone}
   onChange={(e) => {
     const input = e.target.value;
-    // Allow only digits
-    if (/^\d*$/.test(input)) {
+    // Allow only digits and limit to 10 characters
+    if (/^\d{0,10}$/.test(input)) {
       setPhone(input);
     }
   }}
