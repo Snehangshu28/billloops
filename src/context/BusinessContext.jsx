@@ -20,7 +20,7 @@ const defaultData = {
     client: { name: '', address: '', date: '', invoice: '' },
     services: [{ description: '', rate: '', quantity: '', subtotal: '' }],
     discount: '',
-    footer: 'Thank you for your business!',
+    footer: '',
   },
   stock: [],
   employees: [],

@@ -108,8 +108,14 @@ const TEMPLATES = [
 
 const Bill = () => {
   const { data, updateBill } = useBusiness();
+ const today = new Date().toISOString().split('T')[0]; // ✅ Format: YYYY-MM-DD
+
+const initialClient = {
+  name: "",
+  address: "",
+};
   const [bill, setBill] = useState({
-    client: { ...initialClient },
+     client: { ...initialClient, date: today },
     services: [{ ...initialService }],
     products: [{ ...initialProduct }],
     discount: "",
@@ -141,6 +147,7 @@ const Bill = () => {
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [suggestedServices, setSuggestedServices] = useState([]);
   const [suggestedProducts, setSuggestedProducts] = useState([]);
+    const [footerNote, setFooterNote] = useState("Thank you for your business!");
   const location = useLocation();
   const isEditing = location.state?.isEditing || false;
   const billData = location.state?.billData || null;
@@ -928,19 +935,19 @@ const Bill = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={6}>
               <TextField
-  label="Customer Contact Number"
-  name="contact"
-  value={phone}
-  onChange={(e) => {
-    const input = e.target.value;
-    // Allow only digits and limit to 10 characters
-    if (/^\d{0,10}$/.test(input)) {
-      setPhone(input);
-    }
-  }}
-  type="tel"
-  fullWidth
-/>
+                label="Customer Contact Number"
+                name="contact"
+                value={phone}
+                onChange={(e) => {
+                  const input = e.target.value;
+                  // Allow only digits and limit to 10 characters
+                  if (/^\d{0,10}$/.test(input)) {
+                    setPhone(input);
+                  }
+                }}
+                type="tel"
+                fullWidth
+              />
               {showSuggestion && (suggestedName || suggestedAddress) && (
                 <Box
                   sx={{
@@ -1017,19 +1024,19 @@ const Bill = () => {
             />
             <Grid item xs={12} sm={6} md={4}>
               <TextField
-                label="Date"
-                name="date"
-                type="date"
-                value={bill.client.date}
-                onChange={(e) =>
-                  setBill((prev) => ({
-                    ...prev,
-                    client: { ...prev.client, date: e.target.value },
-                  }))
-                }
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
+  label="Date"
+  name="date"
+  type="date"
+  value={bill.client.date || today}
+  onChange={(e) =>
+    setBill((prev) => ({
+      ...prev,
+      client: { ...prev.client, date: e.target.value },
+    }))
+  }
+  fullWidth
+  InputLabelProps={{ shrink: true }}
+/>
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <TextField
@@ -1165,6 +1172,25 @@ const Bill = () => {
               </TableBody>
             </Table>
           </TableContainer>
+        </Paper>
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                label="Discount (%)"
+                value={bill.discount}
+                onChange={handleDiscountChange}
+                type="number"
+                fullWidth
+                inputProps={{ min: 0, max: 100 }}
+                helperText={`Discount: ₹${discountAmount.toLocaleString(
+                  "en-IN",
+                  { maximumFractionDigits: 2 }
+                )}`}
+              />
+            </Grid> 
+          </Grid>
+          <Divider sx={{ my: 2 }} />
         </Paper>
         {/* Products Table Section */}
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
@@ -1399,13 +1425,14 @@ const Bill = () => {
     readOnly: true,
   }}
 /> */}
-          <TextField
-            label="Footer Note"
-            defaultValue="Thank you for your business!"
-            fullWidth
-            multiline
-            minRows={2}
-          />
+           <TextField
+              label="Footer Note"
+              value={footerNote}
+              onChange={(e) => setFooterNote(e.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+            />
         </Paper>
       </Stack>
       {/* Save Button at the bottom */}
