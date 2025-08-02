@@ -108,14 +108,14 @@ const TEMPLATES = [
 
 const Bill = () => {
   const { data, updateBill } = useBusiness();
- const today = new Date().toISOString().split('T')[0]; // ✅ Format: YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0]; // ✅ Format: YYYY-MM-DD
 
-const initialClient = {
-  name: "",
-  address: "",
-};
+  const initialClient = {
+    name: "",
+    address: "",
+  };
   const [bill, setBill] = useState({
-     client: { ...initialClient, date: today },
+    client: { ...initialClient, date: today },
     services: [{ ...initialService }],
     products: [{ ...initialProduct }],
     serviceDiscount: 0,
@@ -130,8 +130,11 @@ const initialClient = {
     // Try to load from localStorage or default to 'modern'
     return localStorage.getItem("billTemplate") || "modern";
   });
-  const [error, setError] = useState('');
-
+  const [error, setError] = useState("");
+  const [total, setTotal] = useState(0);
+  const [cgstAmount, setCgstAmount] = useState(0);
+  const [sgstAmount, setSgstAmount] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState(0);
   const { currentUser } = useAuth();
   const tenantId = currentUser?.uid;
   const [records, setRecords] = useState([]);
@@ -151,7 +154,9 @@ const initialClient = {
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [suggestedServices, setSuggestedServices] = useState([]);
   const [suggestedProducts, setSuggestedProducts] = useState([]);
-    const [footerNote, setFooterNote] = useState("Thank you for your business!");
+  const [serviceDiscountAmount, setServiceDiscountAmount] = useState(0);
+  const [productDiscountAmount, setProductDiscountAmount] = useState(0);
+  const [footerNote, setFooterNote] = useState("Thank you for your business!");
   const location = useLocation();
   const isEditing = location.state?.isEditing || false;
   const billData = location.state?.billData || null;
@@ -396,28 +401,67 @@ const initialClient = {
     });
   };
 
-  // Calculate subtotal for a row
-  const calcSubtotal = (row) => {
-    const rate = parseFloat(row.rate) || 0;
-    const qty = parseFloat(row.quantity) || 0;
-    return rate * qty;
-  };
-  // Calculate subtotal for products
-  const productSubtotal = (bill.products || []).reduce(
-    (sum, row) => sum + calcSubtotal(row),
-    0
-  );
-  // Calculate total and discount
-  const subtotal =
-    (bill.services || []).reduce((sum, row) => sum + calcSubtotal(row), 0) +
-    productSubtotal;
-  const discountPercent = parseFloat(bill.discount) || 0;
-  const discountAmount = subtotal * (discountPercent / 100);
-  const cgstAmount = (subtotal * (parseFloat(cgst) || 0)) / 100;
-  const sgstAmount = (subtotal * (parseFloat(sgst) || 0)) / 100;
-  const total = subtotal - discountAmount + cgstAmount + sgstAmount;
+  // const calcSubtotal = (row) => {
+  //   const rate = parseFloat(row.rate) || 0;
+  //   const qty = parseFloat(row.quantity) || 0;
+  //   return rate * qty;
+  // };
 
-  // Print handler with template selection
+  const calcSubtotal = (item) => {
+    const rate = parseFloat(item.rate || 0);
+    const quantity = parseFloat(item.quantity || 0);
+    return rate * quantity;
+  };
+
+  const calcTotal = () => {
+    const serviceTotal = (bill.services || []).reduce((sum, item) => {
+      const rate = parseFloat(item.rate || 0);
+      const quantity = parseFloat(item.quantity || 0);
+      return sum + rate * quantity;
+    }, 0);
+
+    const productTotal = (bill.products || []).reduce((sum, item) => {
+      const rate = parseFloat(item.rate || 0);
+      const quantity = parseFloat(item.quantity || 0);
+      return sum + rate * quantity;
+    }, 0);
+
+    const serviceDiscountAmount =
+      (parseFloat(bill.serviceDiscount || 0) / 100) * serviceTotal;
+    const productDiscountAmount =
+      (parseFloat(bill.productDiscount || 0) / 100) * productTotal;
+
+    const afterDiscount =
+      serviceTotal -
+      serviceDiscountAmount +
+      productTotal -
+      productDiscountAmount;
+
+    const cgstAmt = (parseFloat(cgst || 0) / 100) * afterDiscount;
+    const sgstAmt = (parseFloat(sgst || 0) / 100) * afterDiscount;
+
+    const finalTotal = afterDiscount + cgstAmt + sgstAmt;
+
+    // 👇 Use the setters here
+    setServiceDiscountAmount(serviceDiscountAmount);
+    setProductDiscountAmount(productDiscountAmount);
+    setDiscountAmount(serviceDiscountAmount + productDiscountAmount);
+
+    setCgstAmount(cgstAmt);
+    setSgstAmount(sgstAmt);
+    setTotal(finalTotal);
+  };
+
+  useEffect(() => {
+    calcTotal();
+  }, [
+    bill.services,
+    bill.products,
+    bill.serviceDiscount,
+    bill.productDiscount,
+    cgst,
+    sgst,
+  ]);
   const handlePrint = () => {
     const employeeName = "";
     let invoiceHtml = "";
@@ -1033,19 +1077,28 @@ const initialClient = {
             />
             <Grid item xs={12} sm={6} md={4}>
               <TextField
-  label="Date"
-  name="date"
-  type="date"
-  value={bill.client.date || today}
-  onChange={(e) =>
-    setBill((prev) => ({
-      ...prev,
-      client: { ...prev.client, date: e.target.value },
-    }))
-  }
-  fullWidth
-  InputLabelProps={{ shrink: true }}
-/>
+                label="Date"
+                name="date"
+                type="date"
+                value={bill.client.date || today}
+                onChange={(e) =>
+                  setBill((prev) => ({
+                    ...prev,
+                    client: { ...prev.client, date: e.target.value },
+                  }))
+                }
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                InputProps={{
+                  sx: {
+                    "& input::-webkit-calendar-picker-indicator": {
+                      opacity: 0,
+                      display: "none",
+                      WebkitAppearance: "none",
+                    },
+                  },
+                }}
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <TextField
@@ -1155,7 +1208,7 @@ const initialClient = {
                     </TableCell>
                     <TableCell>
                       <TextField
-                        value={calcSubtotal(row)}
+                        // value={calcSubtotal(row)}
                         variant="standard"
                         type="number"
                         fullWidth
@@ -1184,22 +1237,22 @@ const initialClient = {
         </Paper>
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
           <Grid container spacing={2} xs={6} sm={6} md={6}>
-              <TextField
-                label=" Service Discount (%)"
-                value={bill.serviceDiscount}
-                onChange={handleDiscountChange}
-                type="number"
-                fullWidth
-                inputProps={{ min: 0, max: 100 }}
-                helperText={`Discount: ₹${discountAmount.toLocaleString(
-                  "en-IN",
-                  { maximumFractionDigits: 2 }
-                )}`}
-              />
-            
+            <TextField
+              label="Service Discount (%)"
+              value={bill.serviceDiscount}
+              onChange={handleDiscountChange}
+              type="number"
+              fullWidth
+              inputProps={{ min: 0, max: 100 }}
+              helperText={`Discount: ₹${serviceDiscountAmount.toLocaleString(
+                "en-IN",
+                { maximumFractionDigits: 2 }
+              )}`}
+            />
           </Grid>
           <Divider sx={{ my: 2 }} />
         </Paper>
+
         {/* Products Table Section */}
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
           <Typography variant="h6" fontWeight={700} gutterBottom>
@@ -1331,55 +1384,54 @@ const initialClient = {
         </Paper>
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
           <Grid container spacing={2} xs={6} sm={6} md={6}>
-              <TextField
-                label=" Product Discount (%)"
-                value={bill.productDiscount}
-                onChange={handleDiscountChange}
-                type="number"
-                fullWidth
-                inputProps={{ min: 0, max: 100 }}
-                helperText={`Discount: ₹${discountAmount.toLocaleString(
-                  "en-IN",
-                  { maximumFractionDigits: 2 }
-                )}`}
-              />
-            
+            <TextField
+              label="Product Discount (%)"
+              value={bill.productDiscount}
+              onChange={handleDiscountChange}
+              type="number"
+              fullWidth
+              inputProps={{ min: 0, max: 100 }}
+              helperText={`Discount: ₹${productDiscountAmount.toLocaleString(
+                "en-IN",
+                { maximumFractionDigits: 2 }
+              )}`}
+            />
           </Grid>
           <Divider sx={{ my: 2 }} />
         </Paper>
+
         {/* Billing Details Section */}
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
-          <Typography variant="h6" fontWeight={700} gutterBottom>
-          </Typography>
-            <Grid item xs={12} sm={6} md={4}>
-          <Grid container spacing={2} sx={{mt: 2}}>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                label="CGST (%)"
-                value={cgst}
-                onChange={(e) => setCgst(e.target.value)}
-                type="number"
-                fullWidth
-                inputProps={{ min: 0, max: 100 }}
-                helperText={`CGST: ₹${cgstAmount.toLocaleString("en-IN", {
-                  maximumFractionDigits: 2,
-                })}`}
-              />
+          <Typography variant="h6" fontWeight={700} gutterBottom></Typography>
+          <Grid item xs={12} sm={6} md={4}>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  label="CGST (%)"
+                  value={cgst}
+                  onChange={(e) => setCgst(e.target.value)}
+                  type="number"
+                  fullWidth
+                  inputProps={{ min: 0, max: 100 }}
+                  helperText={`CGST: ₹${cgstAmount.toLocaleString("en-IN", {
+                    maximumFractionDigits: 2,
+                  })}`}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  label="SGST (%)"
+                  value={sgst}
+                  onChange={(e) => setSgst(e.target.value)}
+                  type="number"
+                  fullWidth
+                  inputProps={{ min: 0, max: 100 }}
+                  helperText={`SGST: ₹${sgstAmount.toLocaleString("en-IN", {
+                    maximumFractionDigits: 2,
+                  })}`}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                label="SGST (%)"
-                value={sgst}
-                onChange={(e) => setSgst(e.target.value)}
-                type="number"
-                fullWidth
-                inputProps={{ min: 0, max: 100 }}
-                helperText={`SGST: ₹${sgstAmount.toLocaleString("en-IN", {
-                  maximumFractionDigits: 2,
-                })}`}
-              />
-            </Grid>
-          </Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <Grid container alignItems="center" sx={{ mb: 2 }}>
@@ -1438,14 +1490,14 @@ const initialClient = {
     readOnly: true,
   }}
 /> */}
-           <TextField
-              label="Footer Note"
-              value={footerNote}
-              onChange={(e) => setFooterNote(e.target.value)}
-              fullWidth
-              multiline
-              minRows={2}
-            />
+          <TextField
+            label="Footer Note"
+            value={footerNote}
+            onChange={(e) => setFooterNote(e.target.value)}
+            fullWidth
+            multiline
+            minRows={2}
+          />
         </Paper>
       </Stack>
       {/* Save Button at the bottom */}
