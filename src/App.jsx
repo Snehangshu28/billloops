@@ -18,10 +18,11 @@ import Customer from './components/dashboard/Customer';
 import Analysis from './components/dashboard/Analysis';
 import { BusinessProvider } from './context/BusinessContext';
 import Login from './components/auth/Login';
-import Signup from './components/auth/Signup';
+// import Signup from './components/auth/Signup';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Offer from './components/dashboard/Offer';
+import Signup from './components/auth/Signup';
 
 const theme = createTheme({
   palette: {
@@ -124,7 +125,8 @@ function App() {
             <AuthProvider>
               <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
+                <Route path='/signup' element={<Signup />} />
+                {/* <Route path="/signup" element={<Signup />} /> */}
                 {/* <Route
                   path="*"
                   element={<Navigate to="/onboarding" replace />}

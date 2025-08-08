@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  async function signup({ company, email, phone, password, country, businessName, businessAddress, businessEmail, businessPhone }) {
+  async function signup({ company, email, phone, password, country }) {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
@@ -57,20 +57,15 @@ export function AuthProvider({ children }) {
       email,
       phone,
       country,
-      businessName,
-      businessAddress,
-      businessEmail,
-      businessPhone,
       createdAt: new Date(),
       ownerUid: user.uid,
     };
-    await setDoc(doc(db, "businessUsers", uid), {
-    businessName,
-    businessAddress,
-    businessEmail,
-    businessPhone,
-    createdAt: new Date(),
-  });
+    await setDoc(doc(db, 'tenants', user.uid), tenantData);
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('tenant', JSON.stringify(tenantData));
+    setCurrentUser(user);
+    setTenantData(tenantData);
+    return user;
   }
 
   async function login(email, password) {
