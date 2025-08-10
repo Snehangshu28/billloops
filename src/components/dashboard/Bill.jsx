@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Button,
@@ -19,19 +19,19 @@ import {
   Select,
   FormControl,
   InputLabel,
-} from "@mui/material";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-import PrintIcon from "@mui/icons-material/Print";
-import { useBusiness } from "../../context/BusinessContext";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+} from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import PrintIcon from '@mui/icons-material/Print';
+import { useBusiness } from '../../context/BusinessContext';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 // import { Dialog, DialogTitle, DialogActions } from '@mui/material';
-import { useAuth } from "../../context/AuthContext";
-import { useLocation } from "react-router-dom";
-import { db } from "../../firebase";
+import { useAuth } from '../../context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { db } from '../../firebase';
 import {
   collection,
   addDoc,
@@ -44,31 +44,31 @@ import {
   limit,
   getDocs,
   getDoc,
-} from "firebase/firestore";
-import Autocomplete from "@mui/material/Autocomplete";
+} from 'firebase/firestore';
+import Autocomplete from '@mui/material/Autocomplete';
 
-const initialService = { description: "", rate: "", quantity: "" };
-const initialProduct = { description: "", stock: "", rate: "", quantity: "" };
+const initialService = { description: '', rate: '', quantity: '' };
+const initialProduct = { description: '', stock: '', rate: '', quantity: '' };
 const initialClient = {
-  name: "",
-  address: "",
-  contact: "",
-  invoice: "",
-  date: "",
-  paymentMode: "",
+  name: '',
+  address: '',
+  contact: '',
+  invoice: '',
+  date: '',
+  paymentMode: '',
 };
 
 const TEMPLATES = [
   {
-    id: "modern",
-    name: "Modern",
+    id: 'modern',
+    name: 'Modern',
     preview: (
       <Box
         sx={{
           p: 2,
-          border: "1px solid #1976d2",
+          border: '1px solid #1976d2',
           borderRadius: 2,
-          background: "#f5f6fa",
+          background: '#f5f6fa',
           minWidth: 200,
         }}
       >
@@ -82,15 +82,15 @@ const TEMPLATES = [
     ),
   },
   {
-    id: "classic",
-    name: "Classic",
+    id: 'classic',
+    name: 'Classic',
     preview: (
       <Box
         sx={{
           p: 2,
-          border: "1px solid #888",
+          border: '1px solid #888',
           borderRadius: 2,
-          background: "#fff",
+          background: '#fff',
           minWidth: 200,
         }}
       >
@@ -108,11 +108,11 @@ const TEMPLATES = [
 
 const Bill = () => {
   const { data, updateBill } = useBusiness();
-  const today = new Date().toISOString().split("T")[0]; // ✅ Format: YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0]; // ✅ Format: YYYY-MM-DD
 
   const initialClient = {
-    name: "",
-    address: "",
+    name: '',
+    address: '',
   };
   const [bill, setBill] = useState({
     client: { ...initialClient, date: today },
@@ -121,17 +121,18 @@ const Bill = () => {
     serviceDiscount: 0,
     productDiscount: 0,
     // discount: "",
-    footer: "",
-    business: { bank: "", account: "" },
+    footer: '',
+    business: { bank: '', account: '' },
   });
   const printRef = useRef();
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(() => {
     // Try to load from localStorage or default to 'modern'
-    return localStorage.getItem("billTemplate") || "modern";
+    return localStorage.getItem('billTemplate') || 'modern';
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [total, setTotal] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
   const [cgstAmount, setCgstAmount] = useState(0);
   const [sgstAmount, setSgstAmount] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -140,23 +141,23 @@ const Bill = () => {
   const [records, setRecords] = useState([]);
   const [stockList, setStockList] = useState([]);
   const [employeeList, setEmployeeList] = useState([]);
-  const [phone, setPhone] = useState("");
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [businessAddress, setBusinessAddress] = useState("");
-  const [businessEmail, setBusinessEmail] = useState("");
-  const [businessPhone, setBusinessPhone] = useState("");
+  const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [businessAddress, setBusinessAddress] = useState('');
+  const [businessEmail, setBusinessEmail] = useState('');
+  const [businessPhone, setBusinessPhone] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [openPrintDialog, setOpenPrintDialog] = useState(false);
-  const [suggestedName, setSuggestedName] = useState("");
-  const [suggestedAddress, setSuggestedAddress] = useState("");
+  const [suggestedName, setSuggestedName] = useState('');
+  const [suggestedAddress, setSuggestedAddress] = useState('');
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [suggestedServices, setSuggestedServices] = useState([]);
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [serviceDiscountAmount, setServiceDiscountAmount] = useState(0);
   const [productDiscountAmount, setProductDiscountAmount] = useState(0);
-  const [footerNote, setFooterNote] = useState("Thank you for your business!");
+  const [footerNote, setFooterNote] = useState('Thank you for your business!');
   const location = useLocation();
   const isEditing = location.state?.isEditing || false;
   const billData = location.state?.billData || null;
@@ -171,10 +172,40 @@ const Bill = () => {
 
   // Add payment mode options
   const paymentModes = [
-    { value: "Cash", label: "Cash" },
-    { value: "Card", label: "Card" },
-    { value: "UPI", label: "UPI" },
+    { value: 'Cash', label: 'Cash' },
+    { value: 'Card', label: 'Card' },
+    { value: 'UPI', label: 'UPI' },
   ];
+
+  // Function to generate invoice number
+  const generateInvoiceNumber = async () => {
+    if (!currentUser?.uid) return 'INV-001';
+
+    try {
+      const billsRef = collection(
+        db,
+        'businessUsers',
+        currentUser.uid,
+        'bills'
+      );
+      const q = query(billsRef, orderBy('createdAt', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        return 'INV-001';
+      }
+
+      const lastBill = querySnapshot.docs[0].data();
+      const lastInvoiceNumber = lastBill.client?.invoice || 'INV-000';
+      const lastNumber = parseInt(lastInvoiceNumber.split('-')[1]) || 0;
+      const nextNumber = lastNumber + 1;
+
+      return `INV-${nextNumber.toString().padStart(3, '0')}`;
+    } catch (error) {
+      console.error('Error generating invoice number:', error);
+      return 'INV-001';
+    }
+  };
 
   // Remove this useEffect to prevent bill state from being overwritten after reset
   useEffect(() => {
@@ -184,18 +215,34 @@ const Bill = () => {
     }));
   }, [data.bill]);
 
+  // Auto-generate invoice number when component mounts or when creating new bill
+  useEffect(() => {
+    const autoGenerateInvoice = async () => {
+      // Only generate if we're not editing an existing bill and invoice is empty
+      if (!isEditing && (!bill.client.invoice || bill.client.invoice === '')) {
+        const newInvoiceNumber = await generateInvoiceNumber();
+        setBill((prev) => ({
+          ...prev,
+          client: { ...prev.client, invoice: newInvoiceNumber },
+        }));
+      }
+    };
+
+    autoGenerateInvoice();
+  }, [isEditing, currentUser?.uid]);
+
   // Fetch stocks for dropdown
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "",
-    businessAddress: "",
-    businessEmail: "",
-    businessPhone: "",
+    businessName: '',
+    businessAddress: '',
+    businessEmail: '',
+    businessPhone: '',
   });
 
   useEffect(() => {
     async function fetchBusinessInfo() {
       if (!currentUser?.uid) return;
-      const docRef = doc(db, "businessUsers", currentUser.uid);
+      const docRef = doc(db, 'businessUsers', currentUser.uid);
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         setBusinessInfo(snap.data());
@@ -207,7 +254,7 @@ const Bill = () => {
   useEffect(() => {
     if (!tenantId) return;
     const unsub = onSnapshot(
-      collection(db, "tenants", tenantId, "stocks"),
+      collection(db, 'tenants', tenantId, 'stocks'),
       (snapshot) => {
         setStockList(
           snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -221,7 +268,7 @@ const Bill = () => {
   useEffect(() => {
     if (!tenantId) return;
     const unsub = onSnapshot(
-      collection(db, "tenants", tenantId, "employees"),
+      collection(db, 'tenants', tenantId, 'employees'),
       (snapshot) => {
         setEmployeeList(
           snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -243,22 +290,22 @@ const Bill = () => {
           billData.products?.length > 0
             ? billData.products
             : [{ ...initialProduct }],
-        discount: billData.discount || "",
-        footer: billData.footer || "",
-        business: billData.business || { bank: "", account: "" },
+        discount: billData.discount || '',
+        footer: billData.footer || '',
+        business: billData.business || { bank: '', account: '' },
       });
     }
   }, [isEditing, billData]);
 
   // Save template selection to localStorage
   useEffect(() => {
-    localStorage.setItem("billTemplate", selectedTemplate);
+    localStorage.setItem('billTemplate', selectedTemplate);
   }, [selectedTemplate]);
 
   useEffect(() => {
     if (!tenantId) return;
     const unsub = onSnapshot(
-      collection(db, "tenants", tenantId, "bills"),
+      collection(db, 'tenants', tenantId, 'bills'),
       (snapshot) => {
         setRecords(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
       }
@@ -270,11 +317,11 @@ const Bill = () => {
   const handleClientContactAutofill = async (phone) => {
     if (!tenantId || !phone) return;
     // Query the most recent bill with this phone number
-    const billsRef = collection(db, "tenants", tenantId, "bills");
+    const billsRef = collection(db, 'tenants', tenantId, 'bills');
     const q = query(
       billsRef,
-      where("client.contact", "==", phone),
-      orderBy("client.date", "desc"),
+      where('client.contact', '==', phone),
+      orderBy('client.date', 'desc'),
       limit(1)
     );
     const snap = await getDocs(q);
@@ -284,8 +331,8 @@ const Bill = () => {
         ...prev,
         client: {
           ...prev.client,
-          name: lastBill.client.name || "",
-          address: lastBill.client.address || "",
+          name: lastBill.client.name || '',
+          address: lastBill.client.address || '',
           contact: phone,
           invoice: prev.client.invoice,
           date: prev.client.date,
@@ -302,7 +349,7 @@ const Bill = () => {
       return updated;
     });
     // Smart autofill on phone number change
-    if (e.target.name === "contact") {
+    if (e.target.name === 'contact') {
       const phone = e.target.value.trim();
       if (phone.length >= 6) {
         // Only search for reasonable phone numbers
@@ -337,9 +384,16 @@ const Bill = () => {
       return updated;
     });
   };
-  const handleDiscountChange = (e) => {
+  const handleServiceDiscountChange = (e) => {
     setBill((prev) => {
-      const updated = { ...prev, discount: e.target.value };
+      const updated = { ...prev, serviceDiscount: e.target.value };
+      return updated;
+    });
+  };
+
+  const handleProductDiscountChange = (e) => {
+    setBill((prev) => {
+      const updated = { ...prev, productDiscount: e.target.value };
       return updated;
     });
   };
@@ -364,14 +418,14 @@ const Bill = () => {
     setBill((prev) => {
       let updatedProducts = prev.products.map((row, i) => {
         if (i === idx) {
-          if (field === "stock") {
+          if (field === 'stock') {
             // Auto-fill rate when stock is selected
             const selectedStock = stockList.find((s) => s.name === value);
             return {
               ...row,
               stock: value,
               rate:
-                selectedStock && selectedStock.price ? selectedStock.price : "",
+                selectedStock && selectedStock.price ? selectedStock.price : '',
             };
           }
           return { ...row, [field]: value };
@@ -426,6 +480,8 @@ const Bill = () => {
       return sum + rate * quantity;
     }, 0);
 
+    const subtotal = serviceTotal + productTotal;
+
     const serviceDiscountAmount =
       (parseFloat(bill.serviceDiscount || 0) / 100) * serviceTotal;
     const productDiscountAmount =
@@ -443,6 +499,7 @@ const Bill = () => {
     const finalTotal = afterDiscount + cgstAmt + sgstAmt;
 
     // 👇 Use the setters here
+    setSubtotal(subtotal);
     setServiceDiscountAmount(serviceDiscountAmount);
     setProductDiscountAmount(productDiscountAmount);
     setDiscountAmount(serviceDiscountAmount + productDiscountAmount);
@@ -463,10 +520,10 @@ const Bill = () => {
     sgst,
   ]);
   const handlePrint = () => {
-    const employeeName = "";
-    let invoiceHtml = "";
-    let style = "";
-    if (selectedTemplate === "modern") {
+    const employeeName = '';
+    let invoiceHtml = '';
+    let style = '';
+    if (selectedTemplate === 'modern') {
       invoiceHtml = `
         <div class=\"invoice-header\">
           <div class=\"app-title\">BILLUS</div>
@@ -480,12 +537,12 @@ const Bill = () => {
         </div>
         <div class=\"client-details\">
           <span class=\"section-title\">Bill To</span>
-          <span><b>${bill.client.name || "Client Name"}</b></span>
+          <span><b>${bill.client.name || 'Client Name'}</b></span>
           <span>${bill.client.address}</span>
-          <span>Contact: ${bill.client.contact || ""}</span>
+          <span>Contact: ${bill.client.contact || ''}</span>
           <span>Invoice #: ${bill.client.invoice}</span>
           <span>Date: ${bill.client.date}</span>
-          <span>Payment Mode: ${bill.client.paymentMode || ""}</span>
+          <span>Payment Mode: ${bill.client.paymentMode || ''}</span>
         </div>
         <div class=\"section-title\">Services</div>
         <table>
@@ -504,14 +561,14 @@ const Bill = () => {
                 (row) => `
               <tr>
                 <td>${row.description}</td>
-                <td>${row.staff || ""}</td>
+                <td>${row.staff || ''}</td>
                 <td>${row.rate}</td>
                 <td>${row.quantity}</td>
                 <td>${calcSubtotal(row)}</td>
               </tr>
             `
               )
-              .join("")}
+              .join('')}
           </tbody>
         </table>
         ${
@@ -538,38 +595,54 @@ const Bill = () => {
                 (row) => `
               <tr>
                 <td>${row.description}</td>
-                <td>${row.stock || ""}</td>
+                <td>${row.stock || ''}</td>
                 <td>${row.rate}</td>
                 <td>${row.quantity}</td>
                 <td>${calcSubtotal(row)}</td>
               </tr>
             `
               )
-              .join("")}
+              .join('')}
           </tbody>
         </table>
         `
-            : ""
+            : ''
         }
         <div class=\"summary\" style=\"text-align:right;\">
           <div><span class=\"label\">Subtotal:</span><span class=\"value\">₹ ${subtotal.toLocaleString(
-            "en-IN",
+            'en-IN',
             { maximumFractionDigits: 2 }
           )}</span></div>
-          <div><span class=\"label\">Discount (${discountPercent}%):</span><span class=\"value\">- ₹ ${discountAmount.toLocaleString(
-        "en-IN",
-        { maximumFractionDigits: 2 }
-      )}</span></div>
+          ${
+            serviceDiscountAmount > 0
+              ? `<div><span class=\"label\">Service Discount (${
+                  bill.serviceDiscount
+                }%):</span><span class=\"value\">- ₹ ${serviceDiscountAmount.toLocaleString(
+                  'en-IN',
+                  { maximumFractionDigits: 2 }
+                )}</span></div>`
+              : ''
+          }
+          ${
+            productDiscountAmount > 0
+              ? `<div><span class=\"label\">Product Discount (${
+                  bill.productDiscount
+                }%):</span><span class=\"value\">- ₹ ${productDiscountAmount.toLocaleString(
+                  'en-IN',
+                  { maximumFractionDigits: 2 }
+                )}</span></div>`
+              : ''
+          }
           <div><span class=\"label\">CGST (${cgst}%):</span><span class=\"value\">+ ₹ ${cgstAmount.toLocaleString(
-        "en-IN",
+        'en-IN',
         { maximumFractionDigits: 2 }
       )}</span></div>
           <div><span class=\"label\">SGST (${sgst}%):</span><span class=\"value\">+ ₹ ${sgstAmount.toLocaleString(
-        "en-IN",
+        'en-IN',
         { maximumFractionDigits: 2 }
       )}</span></div>
           <div style=\"margin-top:12px; font-size:1.3rem; font-weight:700; color:#1976d2; border-top:2px solid #1976d2; padding-top:8px;\"><span class=\"label\">Total:</span><span class=\"value\" style=\"margin-left:16px;\">₹ ${total.toLocaleString(
-            "en-IN",
+            'en-IN',
             { maximumFractionDigits: 2 }
           )}</span></div>
         </div>        
@@ -594,7 +667,7 @@ const Bill = () => {
         .footer-note { margin-top: 32px; font-size: 1rem; color: #666; border-top: 1px dashed #bdbdbd; padding-top: 16px; }
         @media print { body { background: #fff; } .invoice-container { box-shadow: none; margin: 0; } }
       `;
-    } else if (selectedTemplate === "classic") {
+    } else if (selectedTemplate === 'classic') {
       invoiceHtml = `
         <div style=\"border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:24px;\">
           <h2 style=\"margin:0;\">INVOICE</h2>
@@ -604,12 +677,12 @@ const Bill = () => {
           <div>Phone: ${businessPhone}</div>
         </div>
         <div style=\"margin-bottom:16px;\">
-          <b>Bill To:</b> ${bill.client.name || "Client Name"}<br/>
+          <b>Bill To:</b> ${bill.client.name || 'Client Name'}<br/>
           ${bill.client.address}<br/>
-          Contact: ${bill.client.contact || ""}<br/>
+          Contact: ${bill.client.contact || ''}<br/>
           Invoice #: ${bill.client.invoice}<br/>
           Date: ${bill.client.date}<br/>
-          Payment Mode: ${bill.client.paymentMode || ""}
+          Payment Mode: ${bill.client.paymentMode || ''}
         </div>
         <table style=\"width:100%;border-collapse:collapse;margin-bottom:16px;\">
           <thead>
@@ -630,7 +703,7 @@ const Bill = () => {
                   row.description
                 }</td>
                 <td style=\"border:1px solid #000;padding:6px;\">${
-                  row.staff || ""
+                  row.staff || ''
                 }</td>
                 <td style=\"border:1px solid #000;padding:6px;\">${
                   row.rate
@@ -644,7 +717,7 @@ const Bill = () => {
               </tr>
             `
               )
-              .join("")}
+              .join('')}
           </tbody>
         </table>
         ${
@@ -673,7 +746,7 @@ const Bill = () => {
                   row.description
                 }</td>
                 <td style=\"border:1px solid #000;padding:6px;\">${
-                  row.stock || ""
+                  row.stock || ''
                 }</td>
                 <td style=\"border:1px solid #000;padding:6px;\">${
                   row.rate
@@ -687,28 +760,42 @@ const Bill = () => {
               </tr>
             `
               )
-              .join("")}
+              .join('')}
           </tbody>
         </table>
         `
-            : ""
+            : ''
         }
         <div style=\"text-align:right;\">
-          <div>Subtotal: ₹ ${subtotal.toLocaleString("en-IN", {
+          <div>Subtotal: ₹ ${subtotal.toLocaleString('en-IN', {
             maximumFractionDigits: 2,
           })}</div>
-          <div>Discount (${discountPercent}%): - ₹ ${discountAmount.toLocaleString(
-        "en-IN",
-        { maximumFractionDigits: 2 }
-      )}</div>
-          <div>CGST (${cgst}%): + ₹ ${cgstAmount.toLocaleString("en-IN", {
+          ${
+            serviceDiscountAmount > 0
+              ? `<div>Service Discount (${
+                  bill.serviceDiscount
+                }%): - ₹ ${serviceDiscountAmount.toLocaleString('en-IN', {
+                  maximumFractionDigits: 2,
+                })}</div>`
+              : ''
+          }
+          ${
+            productDiscountAmount > 0
+              ? `<div>Product Discount (${
+                  bill.productDiscount
+                }%): - ₹ ${productDiscountAmount.toLocaleString('en-IN', {
+                  maximumFractionDigits: 2,
+                })}</div>`
+              : ''
+          }
+          <div>CGST (${cgst}%): + ₹ ${cgstAmount.toLocaleString('en-IN', {
         maximumFractionDigits: 2,
       })}</div>
-          <div>SGST (${sgst}%): + ₹ ${sgstAmount.toLocaleString("en-IN", {
+          <div>SGST (${sgst}%): + ₹ ${sgstAmount.toLocaleString('en-IN', {
         maximumFractionDigits: 2,
       })}</div>
           <div style=\"margin-top:12px; font-size:1.2rem; font-weight:700; color:#1976d2; border-top:2px solid #000; padding-top:8px;\"><b>Total: ₹ ${total.toLocaleString(
-            "en-IN",
+            'en-IN',
             { maximumFractionDigits: 2 }
           )}</b></div>
         </div>
@@ -724,15 +811,15 @@ const Bill = () => {
         h2 { color: #000; }
       `;
     }
-    const win = window.open("", "", "height=900,width=900");
-    win.document.write("<html><head><title>Invoice</title>");
+    const win = window.open('', '', 'height=900,width=900');
+    win.document.write('<html><head><title>Invoice</title>');
     win.document.write(
       '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" />'
     );
     win.document.write(`<style>${style}</style>`);
-    win.document.write("</head><body>");
+    win.document.write('</head><body>');
     win.document.write(`<div class=\"invoice-container\">${invoiceHtml}</div>`);
-    win.document.write("</body></html>");
+    win.document.write('</body></html>');
     win.document.close();
     win.focus();
     setTimeout(() => win.print(), 500);
@@ -759,9 +846,11 @@ const Bill = () => {
         discountAmount,
         cgstAmount,
         sgstAmount,
+        serviceDiscountAmount,
+        productDiscountAmount,
       };
 
-      await addDoc(collection(db, "tenants", tenantId, "bills"), billToSave);
+      await addDoc(collection(db, 'tenants', tenantId, 'bills'), billToSave);
 
       for (const product of bill.products || []) {
         if (product.stock && product.quantity) {
@@ -772,9 +861,9 @@ const Bill = () => {
               (parseFloat(product.quantity) || 0);
             const productRef = doc(
               db,
-              "tenants",
+              'tenants',
               tenantId,
-              "stocks",
+              'stocks',
               stockItem.id
             );
             await updateDoc(productRef, { quantity: newQty });
@@ -785,7 +874,7 @@ const Bill = () => {
       // ✅ Show dialog after saving
       setOpenPrintDialog(true);
     } catch (error) {
-      console.error("Error saving invoice:", error);
+      console.error('Error saving invoice:', error);
     }
   };
 
@@ -793,25 +882,25 @@ const Bill = () => {
   useEffect(() => {
     const fetchClientData = async () => {
       if (tenantId && phone && phone.length >= 6) {
-        const billsRef = collection(db, "tenants", tenantId, "bills");
+        const billsRef = collection(db, 'tenants', tenantId, 'bills');
         const q = query(
           billsRef,
-          where("client.contact", "==", phone),
-          orderBy("client.date", "desc"),
+          where('client.contact', '==', phone),
+          orderBy('client.date', 'desc'),
           limit(1)
         );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           const data = querySnapshot.docs[0].data();
-          setName(data.client.name || "");
-          setAddress(data.client.address || "");
+          setName(data.client.name || '');
+          setAddress(data.client.address || '');
         } else {
-          setName("");
-          setAddress("");
+          setName('');
+          setAddress('');
         }
       } else {
-        setName("");
-        setAddress("");
+        setName('');
+        setAddress('');
       }
     };
     fetchClientData();
@@ -819,7 +908,7 @@ const Bill = () => {
 
   // Helper to normalize phone numbers (last 10 digits, digits only)
   function normalizePhone(phone) {
-    return phone.replace(/\D/g, "").slice(-10);
+    return phone.replace(/\D/g, '').slice(-10);
   }
 
   // Fetch suggestion on phone change
@@ -827,33 +916,33 @@ const Bill = () => {
     const fetchClientSuggestion = async () => {
       if (tenantId && phone && phone.length >= 6) {
         const searchPhone = normalizePhone(phone.trim());
-        console.log("Searching for phone:", searchPhone);
-        const billsRef = collection(db, "tenants", tenantId, "bills");
+        console.log('Searching for phone:', searchPhone);
+        const billsRef = collection(db, 'tenants', tenantId, 'bills');
         const q = query(
           billsRef,
-          where("client.contact", "==", searchPhone),
-          orderBy("client.date", "desc"),
+          where('client.contact', '==', searchPhone),
+          orderBy('client.date', 'desc'),
           limit(1)
         );
         const querySnapshot = await getDocs(q);
-        console.log("Found docs:", querySnapshot.docs.length);
+        console.log('Found docs:', querySnapshot.docs.length);
         if (!querySnapshot.empty) {
           const data = querySnapshot.docs[0].data();
-          setSuggestedName(data.client.name || "");
-          setSuggestedAddress(data.client.address || "");
+          setSuggestedName(data.client.name || '');
+          setSuggestedAddress(data.client.address || '');
           setSuggestedServices(data.services || []);
           setSuggestedProducts(data.products || []);
           setShowSuggestion(true);
         } else {
-          setSuggestedName("");
-          setSuggestedAddress("");
+          setSuggestedName('');
+          setSuggestedAddress('');
           setSuggestedServices([]);
           setSuggestedProducts([]);
           setShowSuggestion(false);
         }
       } else {
-        setSuggestedName("");
-        setSuggestedAddress("");
+        setSuggestedName('');
+        setSuggestedAddress('');
         setSuggestedServices([]);
         setSuggestedProducts([]);
         setShowSuggestion(false);
@@ -866,11 +955,19 @@ const Bill = () => {
   const handleAcceptSuggestion = () => {
     setName(suggestedName);
     setAddress(suggestedAddress);
+    setBill((prev) => ({
+      ...prev,
+      client: {
+        ...prev.client,
+        name: suggestedName,
+        address: suggestedAddress,
+      },
+    }));
     setShowSuggestion(false);
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", my: 3 }}>
+    <Box sx={{ maxWidth: 900, mx: 'auto', my: 3 }}>
       <Stack direction="row" justifyContent="flex-end" mb={2} spacing={2}>
         <Button
           variant="outlined"
@@ -895,12 +992,12 @@ const Bill = () => {
                 sx={{
                   border:
                     tpl.id === selectedTemplate
-                      ? "2px solid #1976d2"
-                      : "1px solid #ccc",
+                      ? '2px solid #1976d2'
+                      : '1px solid #ccc',
                   borderRadius: 2,
                   p: 1,
-                  background: tpl.id === selectedTemplate ? "#e3f2fd" : "#fff",
-                  cursor: "pointer",
+                  background: tpl.id === selectedTemplate ? '#e3f2fd' : '#fff',
+                  cursor: 'pointer',
                 }}
                 onClick={() => setSelectedTemplate(tpl.id)}
               >
@@ -912,7 +1009,7 @@ const Bill = () => {
                     fontWeight: tpl.id === selectedTemplate ? 700 : 400,
                   }}
                 >
-                  {tpl.id === selectedTemplate ? "Selected" : "Select"}
+                  {tpl.id === selectedTemplate ? 'Selected' : 'Select'}
                 </Typography>
               </Box>
             ))}
@@ -933,14 +1030,6 @@ const Bill = () => {
             <TextField
               label="Business Name"
               value={businessInfo.businessName}
-              fullWidth
-              variant="standard"
-              InputProps={{ readOnly: true }}
-              required
-            />
-            <TextField
-              label="Business Address"
-              value={businessInfo.businessAddress}
               fullWidth
               variant="standard"
               InputProps={{ readOnly: true }}
@@ -988,16 +1077,21 @@ const Bill = () => {
                   // Allow only digits and limit to 10 characters
                   if (/^\d{0,10}$/.test(input)) {
                     setPhone(input);
+                    // Update bill client contact
+                    setBill((prev) => ({
+                      ...prev,
+                      client: { ...prev.client, contact: input },
+                    }));
                   }
                 }}
                 type="tel"
-                error={phone !== "" && phone.length !== 10}
+                error={phone !== '' && phone.length !== 10}
                 helperText={
-                  phone.contact === ""
-                    ? ""
+                  phone === ''
+                    ? ''
                     : phone.length !== 10
-                    ? "Contact number must be exactly 10 digits"
-                    : ""
+                    ? 'Contact number must be exactly 10 digits'
+                    : ''
                 }
                 fullWidth
               />
@@ -1005,10 +1099,10 @@ const Bill = () => {
                 <Box
                   sx={{
                     mt: 1,
-                    background: "#f5f5f5",
+                    background: '#f5f5f5',
                     p: 1,
                     borderRadius: 1,
-                    border: "1px solid #ccc",
+                    border: '1px solid #ccc',
                   }}
                 >
                   <Typography variant="body2" color="text.secondary">
@@ -1056,25 +1150,65 @@ const Bill = () => {
                   <Button
                     size="small"
                     variant="outlined"
-                    sx={{ mt: 1 }}
+                    sx={{ mt: 1, mr: 1 }}
                     onClick={handleAcceptSuggestion}
                   >
                     Use This Info
                   </Button>
                 </Box>
               )}
+              {phone.length === 10 && !showSuggestion && (
+                <Box
+                  sx={{
+                    mt: 1,
+                    background: '#e8f5e8',
+                    p: 1,
+                    borderRadius: 1,
+                    border: '1px solid #4caf50',
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    No existing customer found with this number.
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    sx={{ mt: 1 }}
+                    disabled={!name.trim()}
+                    onClick={() => {
+                      // Clear any existing data and allow user to add new customer
+                      setName('');
+                      setAddress('');
+                      setBill((prev) => ({
+                        ...prev,
+                        client: {
+                          ...prev.client,
+                          name: '',
+                          address: '',
+                        },
+                      }));
+                    }}
+                  >
+                    Add New Customer
+                  </Button>
+                </Box>
+              )}
             </Grid>
-            <TextField
-              label="Client Name"
-              value={bill.client.name}
-              onChange={(e) =>
-                setBill((prev) => ({
-                  ...prev,
-                  client: { ...prev.client, name: e.target.value },
-                }))
-              }
-              fullWidth
-            />
+            <Grid item xs={12} sm={6} md={6}>
+              <TextField
+                label="Client Name"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setBill((prev) => ({
+                    ...prev,
+                    client: { ...prev.client, name: e.target.value },
+                  }));
+                }}
+                fullWidth
+              />
+            </Grid>
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 label="Date"
@@ -1091,10 +1225,10 @@ const Bill = () => {
                 InputLabelProps={{ shrink: true }}
                 InputProps={{
                   sx: {
-                    "& input::-webkit-calendar-picker-indicator": {
+                    '& input::-webkit-calendar-picker-indicator': {
                       opacity: 0,
-                      display: "none",
-                      WebkitAppearance: "none",
+                      display: 'none',
+                      WebkitAppearance: 'none',
                     },
                   },
                 }}
@@ -1105,26 +1239,30 @@ const Bill = () => {
                 label="Invoice #"
                 name="invoice"
                 value={bill.client.invoice}
-                onChange={(e) =>
+                fullWidth
+                InputProps={{ readOnly: true }}
+                sx={{
+                  '& .MuiInputBase-input.Mui-readOnly': {
+                    backgroundColor: '#f5f5f5',
+                    cursor: 'not-allowed',
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Client Address"
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
                   setBill((prev) => ({
                     ...prev,
-                    client: { ...prev.client, invoice: e.target.value },
-                  }))
-                }
+                    client: { ...prev.client, address: e.target.value },
+                  }));
+                }}
                 fullWidth
               />
             </Grid>
-            <TextField
-              label="Client Address"
-              value={bill.client.address}
-              onChange={(e) =>
-                setBill((prev) => ({
-                  ...prev,
-                  client: { ...prev.client, address: e.target.value },
-                }))
-              }
-              fullWidth
-            />
           </Grid>
         </Paper>
         {/* Services Table Section */}
@@ -1153,7 +1291,7 @@ const Bill = () => {
                         onChange={(e) =>
                           handleServiceChange(
                             idx,
-                            "description",
+                            'description',
                             e.target.value
                           )
                         }
@@ -1165,14 +1303,14 @@ const Bill = () => {
                     <TableCell>
                       <FormControl fullWidth variant="standard">
                         <Select
-                          value={row.staff || ""}
+                          value={row.staff || ''}
                           onChange={(e) =>
-                            handleServiceChange(idx, "staff", e.target.value)
+                            handleServiceChange(idx, 'staff', e.target.value)
                           }
                           displayEmpty
                         >
                           <MenuItem value="">
-                            <em style={{ fontStyle: "normal" }}>None</em>
+                            <em style={{ fontStyle: 'normal' }}>None</em>
                           </MenuItem>
                           {employeeList.map((emp) => (
                             <MenuItem value={emp.name} key={emp.id}>
@@ -1186,7 +1324,7 @@ const Bill = () => {
                       <TextField
                         value={row.rate}
                         onChange={(e) =>
-                          handleServiceChange(idx, "rate", e.target.value)
+                          handleServiceChange(idx, 'rate', e.target.value)
                         }
                         placeholder="Rate"
                         variant="standard"
@@ -1198,7 +1336,7 @@ const Bill = () => {
                       <TextField
                         value={row.quantity}
                         onChange={(e) =>
-                          handleServiceChange(idx, "quantity", e.target.value)
+                          handleServiceChange(idx, 'quantity', e.target.value)
                         }
                         placeholder="Qty"
                         variant="standard"
@@ -1208,7 +1346,7 @@ const Bill = () => {
                     </TableCell>
                     <TableCell>
                       <TextField
-                        // value={calcSubtotal(row)}
+                        value={calcSubtotal(row)}
                         variant="standard"
                         type="number"
                         fullWidth
@@ -1240,12 +1378,12 @@ const Bill = () => {
             <TextField
               label="Service Discount (%)"
               value={bill.serviceDiscount}
-              onChange={handleDiscountChange}
+              onChange={handleServiceDiscountChange}
               type="number"
               fullWidth
               inputProps={{ min: 0, max: 100 }}
               helperText={`Discount: ₹${serviceDiscountAmount.toLocaleString(
-                "en-IN",
+                'en-IN',
                 { maximumFractionDigits: 2 }
               )}`}
             />
@@ -1256,7 +1394,7 @@ const Bill = () => {
         {/* Products Table Section */}
         <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
           <Typography variant="h6" fontWeight={700} gutterBottom>
-            Products{" "}
+            Products{' '}
           </Typography>
           <TableContainer>
             <Table size="small">
@@ -1264,7 +1402,6 @@ const Bill = () => {
                 <TableRow>
                   <TableCell>Description</TableCell>
                   <TableCell>Stock</TableCell>
-                  <TableCell>Recommend </TableCell>
                   <TableCell>Rate (₹)</TableCell>
                   <TableCell>Quantity</TableCell>
                   <TableCell>Subtotal (₹)</TableCell>
@@ -1280,7 +1417,7 @@ const Bill = () => {
                         onChange={(e) =>
                           handleProductChange(
                             idx,
-                            "description",
+                            'description',
                             e.target.value
                           )
                         }
@@ -1292,14 +1429,14 @@ const Bill = () => {
                     <TableCell>
                       <FormControl fullWidth variant="standard">
                         <Select
-                          value={row.stock || ""}
+                          value={row.stock || ''}
                           onChange={(e) =>
-                            handleProductChange(idx, "stock", e.target.value)
+                            handleProductChange(idx, 'stock', e.target.value)
                           }
                           displayEmpty
                         >
                           <MenuItem value="">
-                            <em style={{ fontStyle: "normal" }}>None</em>
+                            <em style={{ fontStyle: 'normal' }}>None</em>
                           </MenuItem>
                           {stockList.map((stock) => (
                             <MenuItem value={stock.name} key={stock.id}>
@@ -1310,30 +1447,10 @@ const Bill = () => {
                       </FormControl>
                     </TableCell>
                     <TableCell>
-                      <FormControl fullWidth variant="standard">
-                        <Select
-                          value={row.staff || ""}
-                          onChange={(e) =>
-                            handleServiceChange(idx, "staff", e.target.value)
-                          }
-                          displayEmpty
-                        >
-                          <MenuItem value="">
-                            <em style={{ fontStyle: "normal" }}>None</em>
-                          </MenuItem>
-                          {employeeList.map((emp) => (
-                            <MenuItem value={emp.name} key={emp.id}>
-                              {emp.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </TableCell>
-                    <TableCell>
                       <TextField
                         value={row.rate}
                         onChange={(e) =>
-                          handleProductChange(idx, "rate", e.target.value)
+                          handleProductChange(idx, 'rate', e.target.value)
                         }
                         placeholder="Rate"
                         variant="standard"
@@ -1345,7 +1462,7 @@ const Bill = () => {
                       <TextField
                         value={row.quantity}
                         onChange={(e) =>
-                          handleProductChange(idx, "quantity", e.target.value)
+                          handleProductChange(idx, 'quantity', e.target.value)
                         }
                         placeholder="Qty"
                         variant="standard"
@@ -1387,12 +1504,12 @@ const Bill = () => {
             <TextField
               label="Product Discount (%)"
               value={bill.productDiscount}
-              onChange={handleDiscountChange}
+              onChange={handleProductDiscountChange}
               type="number"
               fullWidth
               inputProps={{ min: 0, max: 100 }}
               helperText={`Discount: ₹${productDiscountAmount.toLocaleString(
-                "en-IN",
+                'en-IN',
                 { maximumFractionDigits: 2 }
               )}`}
             />
@@ -1413,7 +1530,7 @@ const Bill = () => {
                   type="number"
                   fullWidth
                   inputProps={{ min: 0, max: 100 }}
-                  helperText={`CGST: ₹${cgstAmount.toLocaleString("en-IN", {
+                  helperText={`CGST: ₹${cgstAmount.toLocaleString('en-IN', {
                     maximumFractionDigits: 2,
                   })}`}
                 />
@@ -1426,7 +1543,7 @@ const Bill = () => {
                   type="number"
                   fullWidth
                   inputProps={{ min: 0, max: 100 }}
-                  helperText={`SGST: ₹${sgstAmount.toLocaleString("en-IN", {
+                  helperText={`SGST: ₹${sgstAmount.toLocaleString('en-IN', {
                     maximumFractionDigits: 2,
                   })}`}
                 />
@@ -1441,7 +1558,7 @@ const Bill = () => {
                 <Select
                   labelId="payment-mode-label"
                   name="paymentMode"
-                  value={bill.client.paymentMode || ""}
+                  value={bill.client.paymentMode || ''}
                   label="Payment Mode"
                   onChange={handleClientChange}
                 >
@@ -1456,10 +1573,10 @@ const Bill = () => {
             <Grid item xs={12} sm={6} md={8}>
               <Box
                 sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  width: "100%",
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  width: '100%',
                 }}
               >
                 <Typography variant="h6" sx={{ mr: 2 }}>
@@ -1468,14 +1585,14 @@ const Bill = () => {
                 <Typography
                   variant="h5"
                   color="primary"
-                  sx={{ minWidth: 120, textAlign: "right" }}
+                  sx={{ minWidth: 120, textAlign: 'right' }}
                 >
-                  ₹{" "}
+                  ₹{' '}
                   {total >= 0
-                    ? total.toLocaleString("en-IN", {
+                    ? total.toLocaleString('en-IN', {
                         maximumFractionDigits: 2,
                       })
-                    : "0.00"}
+                    : '0.00'}
                 </Typography>
               </Box>
             </Grid>
@@ -1501,7 +1618,7 @@ const Bill = () => {
         </Paper>
       </Stack>
       {/* Save Button at the bottom */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
         <Button variant="contained" color="primary" onClick={handleSaveInvoice}>
           Save Invoice
         </Button>
